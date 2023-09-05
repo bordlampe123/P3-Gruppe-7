@@ -9,8 +9,8 @@ width = img.shape[1]
 
 print("Højde på billede: " + str(height) + ", Bredde på billede: " + str(width))
 
-for i in range(width):
-    for j in range(height):
+for j in range(width):
+    for i in range(height):
         k = img[i, j]
         print(k)
 
