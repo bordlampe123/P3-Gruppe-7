@@ -12,7 +12,7 @@ while True:
     height = int(cap.get(4)) #and here the 4th, which is height
 
     #Here are the functions to draw lines, circles, rectangles, and text on an image/video
-    #above each unique row will be the function params to the side more explanation if needed
+    #above each unique row will be the function params to the side more explanation if neededs
 
     #The line (Canvas, Line start, Line end, Color, thickness)
     img = cv.line(frame, (0,0), (width,height), (0, 0, 255), 1) 
