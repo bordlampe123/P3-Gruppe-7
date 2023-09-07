@@ -19,3 +19,5 @@ for i in range(width):
 # Display the picture
 cv2.imshow("Our window", img)
 cv2.waitKey(0)
+
+print("Hjælp")
