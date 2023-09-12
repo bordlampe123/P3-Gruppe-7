@@ -64,11 +64,11 @@ for y in range(3):
     for x in range(3):
         blank_image[y, x] = RGB[y, x]
 
+correct = cv2.cvtColor(blank_image, cv2.COLOR_RGB2BGR)
 
-
-cv2.imshow("Our window", blank_image)
+cv2.imshow("Our window", correct)
 cv2.waitKey(0)
-cv2.imwrite("Output.png", blank_image)
+cv2.imwrite("Output2.png", correct)
 
 
 
