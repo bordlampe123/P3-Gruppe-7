@@ -1,19 +1,23 @@
 import cv2
-import itertools
 
-image = cv2.imread("C:/Users/pierr/Desktop/P3-cunts/Pierres shit/Computer Vision/tinypic.png", cv2.IMREAD_GRAYSCALE)
+import numpy as np
 
-for row in image:
-    for pixel in row:
-        print(f"Pixel value: {pixel}")
+input = np.array([100, 10, 110, 11],
+                 [9, 50, 8, 49],
+                 [105, 12, 112, 9],
+                 [14, 52, 15, 54])
 
-for y, row in enumerate(image):
-    for x, pixel in enumerate(row):
-        print(f"Pixel value at ({x}, {y}): {pixel}")
+RGB = np.array([[1, 0, 0], [0, 0, 2], [0, 0, 3], [0, 0, 4]],
+               [[5, 0, 0], [0, 6, 0], [0, 7, 0], [0, 8, 0]],
+               [[0, 9, 0], [0, 2, 0], [0, 1, 0], [0, 4, 0]],
+               [[3, 0, 0], [6, 0, 0], [8, 0, 0], [9, 0, 0]])
+
+
+print(RGB[0,0,0])
+
+""" image = cv2.imread("C:/Users/pierr/Desktop/P3-Gruppe-7/Pierres Mappe/finger.jpg", cv2.IMREAD_GRAYSCALE)
 
 for y in range(image.shape[0]):
     for x in range(image.shape[1]):
-        print(f"Pixel value with range at ({x}, {y}): {image[y, x]}")
+        print(f"Pixel value with range at ({x}, {y}): {image[y, x]}") """
 
-for y, x in itertools.product(range(image.shape[0]), range(image.shape[1])):
-    print(f"Pixel value with itertools at ({x}, {y}): {image[y, x]}")
