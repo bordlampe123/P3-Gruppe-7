@@ -5,6 +5,7 @@ import numpy as np
 img = cv2.imread("Pierres Mappe/lion.jpg")
 img_gray = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
 img_gray_enhan = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+img_temp = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
 
 def NestedMethod(A, B):
     for y in range(A.shape[0]):
@@ -22,20 +23,16 @@ def GrayEnhan(A, B, a, b):
     minVal = min(temp)
     maxVal = max(temp)
     
-    print(minVal, maxVal)
-
     leftSpan = maxVal - minVal
-    rightSpan = 255
 
     for y in range(A.shape[0]):
         for x in range(A.shape[0]):
-            scaledGray = float(A[y,x,0]-minVal) / float(leftSpan)
-            temp_val = a * scaledGray + b
-            img_gray_enhan[y, x] = float(temp_val * 255)
+            img_temp = A[y,x,0] + a
+            B[y, x] = img_temp
 
 
 NestedMethod(img, img_gray) 
-GrayEnhan(img_gray, img_gray_enhan, 1, 1)
+GrayEnhan(img_gray, img_gray_enhan, 1, 0)
 img_gray_cv = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 cv2.imshow("Billedet", img)
