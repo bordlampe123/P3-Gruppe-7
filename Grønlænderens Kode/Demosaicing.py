@@ -6,8 +6,8 @@ import cv2 as cv
 
 Bayer_input = np.array([[100,10,110,11],[9,50,8,49],[105,12,112,9],[14,52,15,54]])#defining the Bayer input
 
-RGB = np.zeros((3,3,3),dtype=np.uint8)#defining the RGB output
-print(RGB)
+RGB = np.zeros((3,3,3),dtype=np.uint8)#defining the RGB output, dtype is the data type of the array which is unsigned integer 8 bit
+#print(RGB)
 
 def RGB_B(x,y):#defining the RGB output for the blue pixels
     RGB[x,y,0] = Bayer_input[x+1, y+1]
@@ -42,9 +42,9 @@ def Demosiac(Matrix):#defining the function that creates the RGB output
             else:
                 RGB_R(i,j)#if statement that checks if the pixel is red
     print(RGB)
-    cv.imshow('RGB',RGB)#showing the RGB output
-    cv.imwrite('RGB.png',RGB)#saving the RGB output
-    cv.waitKey(0)#waiting for a key to be pressed
+    #cv.imshow('RGB',RGB)#showing the RGB output
+    #cv.imwrite('RGB.png',RGB)#saving the RGB output
+    #cv.waitKey(0)#waiting for a key to be pressed
     
 
 Demosiac(Bayer_input)
