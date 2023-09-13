@@ -16,7 +16,7 @@ while True:
 
     #The line (Canvas, Line start, Line end, Color, thickness)
     img = cv.line(frame, (0,0), (width,height), (0, 0, 255), 1) 
-    img = cv.line(frame, (width,0), (0,height), (0, 0, 255), 1)#Here we switch to drawing on the precious image as the new canvas to keep the precious drawings
+    img = cv.line(img, (width,0), (0,height), (100, 100, 100), 1)#Here we switch to drawing on the precious image as the new canvas to keep the precious drawings
 
     #The rectangle (Canvas, rectangle corner 1, rectangle corner 2, Color, thickness)
     img = cv.rectangle(img, (5,5), (200,200), (0, 0, 255), 1)
