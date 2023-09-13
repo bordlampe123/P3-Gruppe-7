@@ -8,7 +8,7 @@ img = cv.imread("C:/Users/bebj2/OneDrive/Skrivebord/Billede/TestRed1.png", 1)
 assert img is not None, "file could not be read, check with os.path.exists()"
 print(img.shape)
 #img = cv.resize(img, (0,0), fx=1/5, fy=1/5)
-img = cv.resize(img, (200,200))
+#img = cv.resize(img, (200,200))
 #img = cv.rotate(img, cv.ROTATE_90_COUNTERCLOCKWISE)
 
 #cv.imwrite("NyVersion.png", img)
@@ -17,15 +17,15 @@ img = cv.resize(img, (200,200))
 
 
 
-print(img[5][0:8])
-print("cunt")
+print(img)
+print("hey")
 #cv.imshow("Display window", img)
 k = cv.waitKey(0) # Wait for a keystroke in the window
 
 
 
-for i in range(100):
-    for j in range(100):
+for i in range(200):
+    for j in range(200):
         img[i][j] = [255, 100, 100]
 
 
