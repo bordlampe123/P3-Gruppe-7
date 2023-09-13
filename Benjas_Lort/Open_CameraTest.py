@@ -14,7 +14,7 @@ while True:
 
     image = np.zeros(frame.shape, np.uint8) # this function simply creates and all black image the same size as our frame
     smallerImage = cv.resize(frame, (0,0), fx=0.5, fy=0.5) #Here we resize that smaller image to be half the size
-    image[ :height//2, :width//2] = cv.rotate(smallerImage, cv.ROTATE_180)
+    image[ :height//2, :width//2] = cv.rotate(smallerImage, cv.ROTATE_180) #This determines what image/video should be placed where, here we rotate the image/video we are placing in the top left corner
     image[ :height//2, width//2:] = cv.rotate(smallerImage, cv.ROTATE_180) 
     image[ height//2:, :width//2] = smallerImage
     image[ height//2:, width//2:] = smallerImage
