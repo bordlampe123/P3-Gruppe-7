@@ -11,8 +11,8 @@ for y, row in enumerate(input):#for loop that runs through the rows and columns 
         if value != 0:
             saturation = (value-np.min(pixel))/value
         hue = 0
-        h_denominator = value - np.min(pixel)
-        blue, green, red = [int(color) for color in pixel]
+        h_denominator = value - np.min(pixel)#defining the denominator of the hue formula
+        blue, green, red = [int(color) for color in pixel]#defining the blue, green and red values of the pixel
         if h_denominator != 0:
             if value == red and green >= blue:
                 hue = 60 * (green - blue) / h_denominator
