@@ -20,17 +20,19 @@ res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
 #specify a threshold
 threshold = 0.8
 
-ThresRes = cv.threshold(res, threshold, 255, cv.THRESH_BINARY)[1]
+output = res.copy()
 
-output = input.copy()
-
-ThresRes = (ThresRes).astype(np.uint8) 
+for y in range(res.shape[0]):
+    for x in range(res.shape[1]):
+        if res[y,x] < threshold:
+            output[y,x] = 0
+        else:
+            output[y,x] = 255
 
 #show the final image with the matched area
-
 cv.imshow('input',input)
 cv.imshow('res',res)
-cv.imshow('ThresRes',ThresRes)
+cv.imshow('output',output)
 cv.waitKey(0)   
 
 
