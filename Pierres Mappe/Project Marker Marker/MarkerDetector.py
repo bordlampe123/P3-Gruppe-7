@@ -97,7 +97,7 @@ cY = int(M["m01"] / M["m00"])
 pcX, pcY = MinMax(img_out5)
 pccX, pccY = MinMinMax(img_out5)
 
-#cv2.circle(img, (cX, cY+20), 2, (255, 255, 255), -1)
+cv2.circle(img, (cX, cY), 2, (255, 255, 255), -1)
 cv2.circle(img, (pcX, pcY), 2, (255, 255, 255), -1)
 cv2.circle(img, (pccX, pccY), 2, (255, 255, 255), -1)
 
@@ -110,11 +110,11 @@ cv2.circle(img_out5, (pccX, pccY), 2, (200, 0, 0), -1)
 
 
 cv2.imshow("Threshed", img_out5)
-""" cv2.imshow("Smoothed", img_out4)
+cv2.imshow("Smoothed", img_out4)
 cv2.imshow("Sub Red-Blue-Green", img_out3)
 cv2.imshow("Sub Red-Blue", img_out2)
 cv2.imshow("Only Blue", img_outB)
 cv2.imshow("Only Green", img_outG)
-cv2.imshow("Only Red", img_outR) """
+cv2.imshow("Only Red", img_outR)
 cv2.imshow("Original", img)
 cv2.waitKey(0)
