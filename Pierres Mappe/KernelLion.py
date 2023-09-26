@@ -23,7 +23,7 @@ def MeanFilter(A, B, z):
 
             B[y, x] = sumnorm
 
-MeanFilter(img, img_out, 2)
+MeanFilter(img, img_out, 5)
 
 cv2.imshow("Billedet", img)
 cv2.imshow("Filtered", img_out)
