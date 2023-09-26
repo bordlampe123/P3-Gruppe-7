@@ -1,0 +1,50 @@
+import cv2 as cv
+import numpy as np
+import math
+
+#defining the input image
+input = cv.imread("C:/Users/minik/Desktop/VSCode/55.jpg", cv.IMREAD_COLOR)
+
+#defining the template
+template = cv.imread("C:/Users/minik/Desktop/VSCode/ContourCrown.png", cv.IMREAD_COLOR)
+
+#converting to grayscale
+img_gray = cv.cvtColor(input, cv.COLOR_BGR2GRAY)
+
+#finding edges
+edges = cv.Canny(img_gray, 100, 200)
+
+#finding contours
+contours, hierarchy = cv.findContours(edges, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+
+#drawing contours
+drawing = np.zeros((edges.shape[0], edges.shape[1], 3), dtype=np.uint8)
+for i in range (len(contours)):
+    color = (255, 255, 255)
+    cv.drawContours(drawing, contours, i, color, 2, cv.LINE_8, hierarchy, 0)
+
+
+edges2 = edges.copy()
+
+area_threshold = 700
+
+isolated_contours = []
+for idx, contour in enumerate(contours):
+    area = cv.contourArea(contour)
+    if area >= area_threshold: 
+        isolated_contours.append(contour)
+
+isolated_image = np.zeros_like(input)
+cv.drawContours(isolated_image, isolated_contours, -1, (255, 255, 255), 2)
+
+
+#show the final image with the matched area
+cv.imshow('input',input)
+cv.imshow('edges',edges)
+cv.imshow('drawing',drawing)
+cv.imshow('isolated_image',isolated_image)
+cv.waitKey(0)
+cv.destroyAllWindows()
+
+
+
