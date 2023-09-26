@@ -39,11 +39,20 @@ white_gray = cv2.cvtColor(white_binary_image, cv2.COLOR_BGR2GRAY)
 
 res = cv2.matchTemplate(white_gray, grayTemp, cv2.TM_CCOEFF_NORMED)
 
+contours, hierarchy = cv2.findContours(white_gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+isolated_image = np.zeros_like(image)
+
+cv2.drawContours(isolated_image, contours, -1, (255, 255, 255), 2)
+
+
 
 # Show the binary image
 cv2.imshow("Yellow Binary Image", yellow_binary_image)
 cv2.imshow("White Binary Image", white_binary_image)
 cv2.imshow("White Gray Image", white_gray)
+cv2.imshow("Isolated Image", isolated_image)
 cv2.imshow("res", res)
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()
