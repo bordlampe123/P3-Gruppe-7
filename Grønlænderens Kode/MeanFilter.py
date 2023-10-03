@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 
-input = cv2.imread("C:/Users/minik/Desktop/VSCode/lion.jpg")#defining the input image
+input = cv2.imread("C:/Users/minik/Desktop/VSCode/55.jpg")#defining the input image
 
 def meanFilter(input, kernelSize):
 
@@ -21,7 +21,7 @@ def meanFilter(input, kernelSize):
                 output[y, x, color] = sum
     return output
                 
-output = meanFilter(input, 83)
+output = meanFilter(input, 10)
 cv2.imshow('input',input)
 cv2.imshow('output',output)
 cv2.waitKey(0)
