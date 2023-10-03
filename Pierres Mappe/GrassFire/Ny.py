@@ -54,11 +54,6 @@ def ignite(y, x, A):
         
         increment()
 
-
-
-        
-
-
 Thresh(img, img_threshed, 255)
 
 for y in range(img_threshed.shape[0]):
