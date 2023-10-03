@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import statistics as st
 
-img = cv2.imread("Pierres Mappe/Kingdomino/Billeder/5.jpg")
+img = cv2.imread("Pierres Mappe/Kingdomino/Billeder/2.jpg")
 
 
 
@@ -164,15 +164,15 @@ def MeanFilterColor(A, B, z):
 Meanifier(img, img_out)
 Medaifier(img, img_outout)
 
-cv2.line(img,(100,0),(100,500),(255,255,255),3)
-cv2.line(img,(200,0),(200,500),(255,255,255),3)
-cv2.line(img,(300,0),(300,500),(255,255,255),3)
-cv2.line(img,(400,0),(400,500),(255,255,255),3)
+cv2.line(img,(100,0),(100,500),(255,255,255),2)
+cv2.line(img,(200,0),(200,500),(255,255,255),2)
+cv2.line(img,(300,0),(300,500),(255,255,255),2)
+cv2.line(img,(400,0),(400,500),(255,255,255),2)
 
-cv2.line(img,(0,100),(500,100),(255,255,255),3)
-cv2.line(img,(0,200),(500,200),(255,255,255),3)
-cv2.line(img,(0,300),(500,300),(255,255,255),3)
-cv2.line(img,(0,400),(500,400),(255,255,255),3)
+cv2.line(img,(0,100),(500,100),(255,255,255),2)
+cv2.line(img,(0,200),(500,200),(255,255,255),2)
+cv2.line(img,(0,300),(500,300),(255,255,255),2)
+cv2.line(img,(0,400),(500,400),(255,255,255),2)
 
 
 print(img[50, 150])
@@ -189,9 +189,7 @@ img_out3 = cv2.subtract(img_out2, img_outR)
 
 cv2.imshow("Original", img)
 cv2.imshow("Smoothed", img_out)
-cv2.imshow("Blue", img_outB)
-cv2.imshow("Green", img_outG)
-cv2.imshow("Red", img_outR)
+cv2.imshow("Blue", img_outout)
 
 
 cv2.waitKey(0)
