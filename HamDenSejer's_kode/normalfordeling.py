@@ -8,6 +8,6 @@ samples = 1000
 
 sample = np.random.normal(mean, sigma, samples)
 
-count = plt.hist(sample, 100)
+plt.hist(sample, 100)
 
-print(count)
+plt.show()
