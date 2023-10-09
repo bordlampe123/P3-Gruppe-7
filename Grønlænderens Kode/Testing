@@ -5,29 +5,37 @@ import numpy as np
 image = cv2.imread("C:/Users/minik/Desktop/VSCode/55.jpg")
 
 #define the template
-template = cv2.imread("C:/Users/minik/Desktop/VSCode/ThreshCrown.png", cv2.IMREAD_COLOR)
+template = cv2.imread("C:/Users/minik/Desktop/VSCode/ContourCrown.png", cv2.IMREAD_COLOR)
+
 
 # Convert the image to the grayscale color space
 grayTemp = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+
+
+template90 = cv2.rotate(template, cv2.ROTATE_90_CLOCKWISE)
+
+template180 = cv2.rotate(template, cv2.ROTATE_180)
+
+template270 = cv2.rotate(template, cv2.ROTATE_90_COUNTERCLOCKWISE) 
 
 # Convert the image to the HSV color space
 hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
 # Define the lower and upper bounds for the yellow color range in HSV
-lower_yellow = np.array([20, 100, 100])  # Adjust these values as needed
-upper_yellow = np.array([30, 255, 255])  # Adjust these values as needed
+#lower_yellow = np.array([20, 100, 100])  # Adjust these values as needed
+#upper_yellow = np.array([30, 255, 255])  # Adjust these values as needed
 
 #define the lower and upper bounds for the white color range in HSV
 
-sensitivity = 120
+sensitivity = 130
 lower_white = np.array([0, 0, 255-sensitivity])
 upper_white = np.array([255, sensitivity, 255])
 
 # Create a binary mask for the yellow color range
-yellow_mask = cv2.inRange(hsv_image, lower_yellow, upper_yellow)
+#yellow_mask = cv2.inRange(hsv_image, lower_yellow, upper_yellow)
 
 # Apply the mask to the original image to get the binary result
-yellow_binary_image = cv2.bitwise_and(image, image, mask=yellow_mask)
+#yellow_binary_image = cv2.bitwise_and(image, image, mask=yellow_mask)
 
 # Create a binary mask for the white color range
 white_mask = cv2.inRange(hsv_image, lower_white, upper_white)
@@ -37,22 +45,31 @@ white_binary_image = cv2.bitwise_and(image, image, mask=white_mask)
 
 white_gray = cv2.cvtColor(white_binary_image, cv2.COLOR_BGR2GRAY)
 
-res = cv2.matchTemplate(white_gray, grayTemp, cv2.TM_CCOEFF_NORMED)
-
 contours, hierarchy = cv2.findContours(white_gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 isolated_image = np.zeros_like(image)
 
+edged = cv2.Canny(white_gray, 30, 200)
+
 cv2.drawContours(isolated_image, contours, -1, (255, 255, 255), 2)
+
+res1 = cv2.matchTemplate(isolated_image, template, cv2.TM_CCOEFF_NORMED)
+res2 = cv2.matchTemplate(isolated_image, template90, cv2.TM_CCOEFF_NORMED)
+res3 = cv2.matchTemplate(isolated_image, template180, cv2.TM_CCOEFF_NORMED)
+res4 = cv2.matchTemplate(isolated_image, template270, cv2.TM_CCOEFF_NORMED)
 
 
 
 # Show the binary image
-cv2.imshow("Yellow Binary Image", yellow_binary_image)
+#cv2.imshow("Yellow Binary Image", yellow_binary_image)
 cv2.imshow("White Binary Image", white_binary_image)
 cv2.imshow("White Gray Image", white_gray)
 cv2.imshow("Isolated Image", isolated_image)
-cv2.imshow("res", res)
+cv2.imshow("res1", res1)
+cv2.imshow("res2", res2)
+cv2.imshow("res3", res3)
+cv2.imshow("res4", res4)
+cv2.imshow("edged", edged)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
