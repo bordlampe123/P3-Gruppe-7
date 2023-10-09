@@ -9,6 +9,7 @@ def MeanFilter(A, B, z):
     kernel = np.ones((z*2+1, z*2+1), np.uint8)
 
     for y in range(z, img.shape[0]-z):
+        print(y)
         starty = y-z    
         for x in range(z, img.shape[1]-z):
             startx = x-z
@@ -25,6 +26,7 @@ def MeanFilter(A, B, z):
 
 MeanFilter(img, img_out, 5)
 
+cv2.imwrite("blurred.jpg", img_out)
 cv2.imshow("Billedet", img)
 cv2.imshow("Filtered", img_out)
 cv2.waitKey(0)
