@@ -23,8 +23,12 @@ ax.scatter(class3[:,0], class3[:,1], class3[:,2], c='g', marker='o', label = 'cl
 ax.scatter(class4[:,0], class4[:,1], class4[:,2], c='y', marker='o', label = 'class4')
 ax.scatter(unknown[:,0], unknown[:,1], unknown[:,2], c='k', marker='o', label = 'unknown')
 
-def nearN(input, k):
-    
+#euclidian distance
+#def distance(x1, x2):
+    #return np.sqrt(np.sum((x1-x2)**2))
+
+#def nearN(input, k):
+
 
 plt.show()
 
