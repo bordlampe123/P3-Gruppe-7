@@ -7,21 +7,20 @@ mean = 2
 
 sigma = 2
 
-sampleCount = 10000000
+sampleCount = 10000
 
 samples = np.random.normal(size=sampleCount, loc = mean, scale = sigma)
 
 
-x = np.linspace(-10, 10, 100)
 
-plt.plot(x, (1/(sigma*m.sqrt(2*m.pi())))*m.exp(-((x-mean)**2)/(2*sigma**2)), color='red')
 
-plt.show()
 
+x  = np.linspace(mean - 3*sigma, mean + 3*sigma, sampleCount)
+scaling = sampleCount
+print(scaling)
+plt.plot(x, scaling*(1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x - mean)**2 / (2 * sigma**2))), linewidth=2, color='r')
 
 
 _ = plt.hist(samples, bins = 'auto')
 
 plt.show()
-
-print(samples)
