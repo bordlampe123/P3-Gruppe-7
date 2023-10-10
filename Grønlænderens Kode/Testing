@@ -7,7 +7,6 @@ image = cv2.imread("C:/Users/minik/Desktop/VSCode/55.jpg")
 #define the template
 template = cv2.imread("C:/Users/minik/Desktop/VSCode/ContourCrown.png", cv2.IMREAD_COLOR)
 
-
 # Convert the image to the grayscale color space
 grayTemp = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
 
