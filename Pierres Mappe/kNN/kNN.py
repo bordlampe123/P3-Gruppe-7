@@ -23,11 +23,6 @@ plt.show()
 
 def near(input, k):
 
-    x = input[0]
-    y = input[1]
-    z = input[2]
-    t = input[3]
-
     distList = []
 
     for nr in range(class1.shape[0]):
@@ -56,6 +51,5 @@ def near(input, k):
     
     print(kNearest)
     #print(distList)
-
 
 near(unknown[0], 2)
