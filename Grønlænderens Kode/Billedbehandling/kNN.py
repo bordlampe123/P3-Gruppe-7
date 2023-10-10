@@ -17,12 +17,14 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
 
-plt.plot(class1[:,0], class1[:,1], class1[:,2], 'ro')
-plt.plot(class2[:,0], class2[:,1], class2[:,2], 'bo')
-plt.plot(class3[:,0], class3[:,1], class3[:,2], 'go')
-plt.plot(class4[:,0], class4[:,1], class4[:,2], 'yo')
-plt.plot(unknown[:,0], unknown[:,1], unknown[:,2], 'ko')
+ax.scatter(class1[:,0], class1[:,1], class1[:,2], c='r', marker='o', label = 'class1')
+ax.scatter(class2[:,0], class2[:,1], class2[:,2], c='b', marker='o', label = 'class2')
+ax.scatter(class3[:,0], class3[:,1], class3[:,2], c='g', marker='o', label = 'class3')
+ax.scatter(class4[:,0], class4[:,1], class4[:,2], c='y', marker='o', label = 'class4')
+ax.scatter(unknown[:,0], unknown[:,1], unknown[:,2], c='k', marker='o', label = 'unknown')
 
+def nearN(input, k):
+    
 
 plt.show()
 
