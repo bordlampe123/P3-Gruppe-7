@@ -1,20 +1,20 @@
 import numpy as np
-import cv2 as cv
 import matplotlib.pyplot as plt
 
-data1 = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9/trainClass1.dat")
-data2 = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9/trainClass2.dat")
-data3 = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9/trainClass3.dat")
-data4 = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9/trainClass4.dat")
-datau = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9/unknown.dat")
+data1 = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9_10/trainClass1.dat")
+data2 = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang90_10/trainClass2.dat")
+data3 = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9_10/trainClass3.dat")
+data4 = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9_10/trainClass4.dat")
+datau = np.loadtxt("Ding_Dings_kode/Billedbehandling/Gang9_10/unknown.dat")
 
 
 def splot(data,size):
-    data = np.reshape(data, (4, size))
+    data = np.reshape(data, (5, size))
     data0 = data[0]
     data1 = data[1]
     data2 = data[2]
     data3 = data[3]
+    data4 = data[4]
 
 
     fig, ax = plt.subplots()
