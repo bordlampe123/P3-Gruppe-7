@@ -5,14 +5,13 @@ import random as rd
 img = cv2.imread("Pierres Mappe/GrassFire/shapes.png", cv2.IMREAD_GRAYSCALE)
 img_threshed = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
 img_out2 = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
-img_out3 = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
-id = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
+id = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
 
-current_id = 50
+current_id = 1
 
 def increment():
     global current_id
-    current_id += 10
+    current_id += 1
 
 def Thresh(A, B, z):
     for y in range(A.shape[0]):
@@ -58,6 +57,7 @@ for y in range(img_threshed.shape[0]):
     for x in range(img_threshed.shape[1]):
         ignite(y, x, img_threshed)
         #print(current_id)
+
 
 cv2.imshow("Original", img)
 cv2.imshow("Threshed", img_threshed)
