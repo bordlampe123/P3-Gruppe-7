@@ -5,17 +5,18 @@ import numpy as np
 image = cv2.imread("C:/Users/minik/Desktop/VSCode/55.jpg")
 
 #define the template
-template = cv2.imread("C:/Users/minik/Desktop/VSCode/ContourCrown.png", cv2.IMREAD_COLOR)
+template = cv2.imread("C:/Users/minik/Desktop/VSCode/ThreshCrown.png", cv2.IMREAD_COLOR)
 
 # Convert the image to the grayscale color space
 grayTemp = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
 
+w, h = grayTemp.shape[::-1]
 
-template90 = cv2.rotate(template, cv2.ROTATE_90_CLOCKWISE)
+template90 = cv2.rotate(grayTemp, cv2.ROTATE_90_CLOCKWISE)
 
-template180 = cv2.rotate(template, cv2.ROTATE_180)
+template180 = cv2.rotate(grayTemp, cv2.ROTATE_180)
 
-template270 = cv2.rotate(template, cv2.ROTATE_90_COUNTERCLOCKWISE) 
+template270 = cv2.rotate(grayTemp, cv2.ROTATE_90_COUNTERCLOCKWISE) 
 
 # Convert the image to the HSV color space
 hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -52,13 +53,33 @@ edged = cv2.Canny(white_gray, 30, 200)
 
 cv2.drawContours(isolated_image, contours, -1, (255, 255, 255), 2)
 
-res1 = cv2.matchTemplate(isolated_image, template, cv2.TM_CCOEFF_NORMED)
-res2 = cv2.matchTemplate(isolated_image, template90, cv2.TM_CCOEFF_NORMED)
-res3 = cv2.matchTemplate(isolated_image, template180, cv2.TM_CCOEFF_NORMED)
-res4 = cv2.matchTemplate(isolated_image, template270, cv2.TM_CCOEFF_NORMED)
+isolated_image = cv2.cvtColor(isolated_image, cv2.COLOR_BGR2GRAY)
+
+res1 = cv2.matchTemplate(white_gray, grayTemp, cv2.TM_CCOEFF_NORMED)
+res2 = cv2.matchTemplate(white_gray, template90, cv2.TM_CCOEFF_NORMED)
+res3 = cv2.matchTemplate(white_gray, template180, cv2.TM_CCOEFF_NORMED)
+res4 = cv2.matchTemplate(white_gray, template270, cv2.TM_CCOEFF_NORMED)
+
+threshold = 0.8
+
+loc = np.where(res1 >= threshold)
+loc2 = np.where(res2 >= threshold)
+loc3 = np.where(res3 >= threshold)
+loc4 = np.where(res4 >= threshold)
 
 
+for pt in zip(*loc[::-1]):
+	cv2.rectangle(white_gray, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
 
+for pt in zip(*loc2[::-1]):
+	cv2.rectangle(white_gray, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
+
+for pt in zip(*loc3[::-1]):
+	cv2.rectangle(white_gray, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
+
+for pt in zip(*loc4[::-1]):
+	cv2.rectangle(white_gray, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
+	
 # Show the binary image
 #cv2.imshow("Yellow Binary Image", yellow_binary_image)
 cv2.imshow("White Binary Image", white_binary_image)
