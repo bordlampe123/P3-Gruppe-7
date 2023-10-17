@@ -1,9 +1,7 @@
 import cv2 as cv
 import numpy as np
 
-img = cv.imread("HamDenSejer's_kode/lion.jpg")
-
-
+img = cv.imread("Ding_Dings_kode/Billedbehandling/lion.jpg")
 
 def meanfilter(img, kernelsize):
     output = np.zeros(img.shape)
@@ -21,7 +19,7 @@ def meanfilter(img, kernelsize):
             output[x][y] = np.sum(img[x-kernelsize//2:x+kernelsize//2+1, y-kernelsize//2:y+kernelsize//2+1] * kernel)
     return output
 
-cv.imshow("filter",meanfilter(img, 3))
+cv.imshow("filter",meanfilter(img, 5))
 
 cv.imshow("image", img)
 cv.waitKey(0)

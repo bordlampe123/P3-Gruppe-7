@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import math
 
 
 def lav_en_pixels_billede_BGR(input):
@@ -45,10 +46,13 @@ template = np.zeros_like(Data_Image) #billede vi tegner på
 
 
 #Spændene vars
-Størelse_På_Firkanter = 100 #i pixels
+Størelse_På_Firkanter = 25 #i pixels
 Resolution = int((500**2)/(Størelse_På_Firkanter**2)) #hov many times
+size = int(math.sqrt(Resolution))
 HolderArray = np.zeros((image_count, Resolution, color_level+1)) #Farverne for alle felter i et array. Med størrelserne 74 billeder resolution på 25 og color depth på 3 bliver det en 74x25x4 matrix
 HolderArray2 = np.zeros((image_count, Resolution, color_level+1))
+HolderArray3 = np.zeros((image_count, size, size, color_level+1))
+LOPF2 = np.array((image_count, Resolution, color_level))
 Library = np.zeros((image_count, Resolution, color_level), dtype='uint8')
 Library2 = np.zeros((image_count, Resolution, color_level), dtype='uint8')
 iterations = int(image_Size/Størelse_På_Firkanter) #størelsen af billedet divideret med størelsen vi vil lave firkanter giver iterationstallet
@@ -76,12 +80,30 @@ def Gem_Alle_Billeder(input, ite):
     for i in range(ite):
         for j in range(ite):
             sub_image = gembillede(input, i, j)
-            list.append(sub_image)
+            Sub_Image_List.append(sub_image)
 
 #Denne funktion gemmer mean colors fra et enkelt billedes underbilleder
-def Liste_Med_Underbilleder(UB, ite):
+def Liste_Med_Underbilleders_Farver(UB, ite):
     for i in range(ite*ite):
         LOPF.append([int(prominent(UB[i])[0]), int(prominent(UB[i])[1]), int(prominent(UB[i])[2])])
+
+
+
+def Liste_Med_Underbilleders_Farver(UB, ite):
+    for i in range(ite*ite):
+        LOPF.append([int(prominent(UB[i])[0]), int(prominent(UB[i])[1]), int(prominent(UB[i])[2])])
+        
+
+
+
+def Liste_Med_Underbilleders_Farver2(UB, ite):
+    for i in range(ite):
+        for j in range(ite):
+            
+            break
+            
+            
+            #LOPF2.append([int(prominent(UB[i])[0]), int(prominent(UB[i])[1]), int(prominent(UB[i])[2])])
 
 #Lav en library med alle billeder
 def Dictionary_generator(Amount, path, dictionary):
@@ -121,45 +143,24 @@ def Find_farverne_På_Firkanterne_igen(temp, Lib):
             #print(R,S, " = ", Specific_AVG_Color)
 
 
-
-
-
-
-Dictionary_generator(image_count, path, image_dict)
-
-for N in range(1, image_count + 1):
-    image = image_dict[f'image{N}']
-    list = []
-    Gem_Alle_Billeder(image, iterations)
-    Liste_Med_Underbilleder(list, iterations)
-    Tegn_Firkanter(Størelse_På_Firkanter, iterations, template)
-
-    HSV = cv.cvtColor(template, cv.COLOR_BGR2HSV_FULL)
-    Find_farverne_På_Firkanterne_igen(HSV, Library)
-    Find_farverne_På_Firkanterne_igen(template, Library2)
-
-    Window_name = f'vindue{N}'
-    cv.imshow(Window_name, template)
-    cv.imshow("testing", image_dict[f'image{N}'])
-    #lav_en_pixels_billede_HSV([42, 195, 149])
-    #lav_en_pixels_billede_BGR(HolderArray2[0][0][:])
-    cv.waitKey()
-    cv.destroyAllWindows()
-
-
-
-
-
-
 #Library.resize(image_count, Resolution, color_level+1)
-def Array_Til_HSV_Farver(Amount, Res, CL, lib):
+def Array_Til_HSV_Farver(Amount, Res, CL, lib, HV3):
     print("BGR")
+    f = 0
     for k in range(Amount):
         for i in range(Res):
             for j in range (CL):
                 HolderArray[k][i][j] = lib[k][i][j]
+
                 #if 75 < HolderArray[k][i][0] < 150:
                 #print(i, "= grøn")
+
+
+    #print(HolderArray[0][20][:])
+    #print(HolderArray3[0][1][0][:])
+
+
+
 
 def Array_Til_BGR_Farver(Amount, Res, CL, lib):
     print("RGB")
@@ -170,26 +171,67 @@ def Array_Til_BGR_Farver(Amount, Res, CL, lib):
                 #if 75 < HolderArray[k][i][0] < 150:
                 #print(i, "= grøn")
 
-Array_Til_HSV_Farver(image_count, Resolution, color_level, Library)
-Array_Til_BGR_Farver(image_count, Resolution, color_level, Library2)
+
+
+Dictionary_generator(image_count, path, image_dict)
+
+for N in range(1, image_count + 1):
+    image = image_dict[f'image{N}']
+    Sub_Image_List = []
+    Gem_Alle_Billeder(image, iterations)
+    Liste_Med_Underbilleders_Farver(Sub_Image_List, iterations)
+    Tegn_Firkanter(Størelse_På_Firkanter, iterations, template)
+
+
+    HSV = cv.cvtColor(template, cv.COLOR_BGR2HSV_FULL)
+    Find_farverne_På_Firkanterne_igen(HSV, Library)
+    Find_farverne_På_Firkanterne_igen(template, Library2)
+
+    Window_name = f'vindue{N}'
+    cv.imshow(Window_name, template)
+    cv.imshow("testing", image_dict[f'image{N}'])
+
+    Array_Til_HSV_Farver(image_count, Resolution, color_level, Library, HolderArray3)
+    HolderArray3 = np.reshape(HolderArray, (image_count, size, size, color_level+1))
+
+    #lav_en_pixels_billede_HSV([42, 195, 149])
+    #lav_en_pixels_billede_BGR(HolderArray2[0][0][:])
+    cv.waitKey()
+    cv.destroyAllWindows()
+
+
+
+#Array_Til_HSV_Farver(image_count, Resolution, color_level, Library, HolderArray3)
+#Array_Til_BGR_Farver(image_count, Resolution, color_level, Library2)
 
 print(HolderArray.shape)
 print('hsv', HolderArray[0][0][:])
-print('bgr', HolderArray2[0][0][:])
-for i in range(image_count):
-    for j in range(Resolution):
-        #print("j = ", j, "=", HolderArray[1][j][0])
-        if 59 < HolderArray[i][j][0] < 90:
-            HolderArray[i][j][3] = 1
-
-for i in range(25):
-    if HolderArray[0][i][3] == True:
-        print(i, " = q", HolderArray[0][i][3], " and ", HolderArray[0][i][0])
-    
+print('bgr', HolderArray3[0][0][0][:])
 
 
+template3 = np.zeros_like(template)
+def Array_AVG(Input_Array, temp):
+    y_1 = -Størelse_På_Firkanter
+    y_2 = 0
+    for i in range(size):
+        x_1 = 0
+        x_2 = Størelse_På_Firkanter
+        y_1 = y_1 + Størelse_På_Firkanter
+        y_2 = y_2 + Størelse_På_Firkanter
+        for j in range(size):
+            temp = cv.rectangle(temp, (x_1, y_1), (x_2, y_2), tuple(Input_Array[0][i][j]), -1)
+            x_1 = x_1 + Størelse_På_Firkanter
+            x_2 = x_2 + Størelse_På_Firkanter
 
 
+
+Array_AVG(HolderArray3, template3)
+cv.imshow("Teser", template3)
+
+
+
+
+#print(len(LOPF))
 
 
 
