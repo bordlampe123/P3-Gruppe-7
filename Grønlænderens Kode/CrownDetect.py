@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 # Load the image
-image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/19.jpg")
+image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/55.jpg")
 cv.imshow("board", image)   
 
 # Split the image into RGB channels
@@ -44,10 +44,17 @@ FinalImage2 = cv.subtract(BRBSub, BRSub)
 
 # Convert the image to the grayscale color space
 gray_img = cv.merge((FinalImage, FinalImage, FinalImage))
+
 cv.imshow("gray_img", gray_img)
 
 # Template
 template = cv.imread("C:/Users/minik/Desktop/VSCode/Crown_bw.png", cv.IMREAD_COLOR)
+
+#templateL = cv.imread("C:/Users/minik/Desktop/VSCode/Crown_L.png", cv.IMREAD_COLOR)
+
+#templateR = cv.imread("C:/Users/minik/Desktop/VSCode/Crown_R.png", cv.IMREAD_COLOR)
+
+#templateD = cv.imread("C:/Users/minik/Desktop/VSCode/Crown_D.png", cv.IMREAD_COLOR)
 
 # Blurred template
 #template2 = cv.GaussianBlur(template, (7, 7), 0)
@@ -57,6 +64,8 @@ gray_img2 = cv.GaussianBlur(gray_img, (7, 7), 0)
 
 # Create an array with the templates rotated 90, 180 and 270 degrees
 Templates = [template, cv.rotate(template, cv.ROTATE_90_CLOCKWISE), cv.rotate(template, cv.ROTATE_180), cv.rotate(template, cv.ROTATE_90_COUNTERCLOCKWISE)]
+
+#Templates = [template, templateL, templateD, templateR]
 
 #Templates2 = [template2, cv.rotate(template2, cv.ROTATE_90_CLOCKWISE), cv.rotate(template2, cv.ROTATE_180), cv.rotate(template2, cv.ROTATE_90_COUNTERCLOCKWISE)]
 
