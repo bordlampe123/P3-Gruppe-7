@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 # Load the image
-image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/55.jpg")
+image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/19.jpg")
 cv.imshow("board", image)   
 
 # Split the image into RGB channels
@@ -99,7 +99,7 @@ for i in range(5):
 for i in range(len(subimages)):
     for j in range(len(Templates)):
         res = cv.matchTemplate(subimages[i], Templates[j], cv.TM_CCOEFF_NORMED)
-        loc = np.where(res >= 0.6)
+        loc = np.where(res >= 0.65)
 
         for pt in zip(*loc[::-1]):
             cv.rectangle(subimages[i], pt, (pt[0] + tw, pt[1] + th), (0, 255, 255), 2)
