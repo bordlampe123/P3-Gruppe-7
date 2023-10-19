@@ -2,9 +2,10 @@ import cv2
 import numpy as np
 import statistics as st
 
-img = cv2.imread("Pierres Mappe/Kingdomino/Billeder/2.jpg")
+img = cv2.imread("Pierres Mappe/Kingdomino/Billeder/5.jpg")
 
 
+HSVvals = np.zeros((5, 5, 1))
 
 
 img_out = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
@@ -64,18 +65,19 @@ def Medaifier(A, B):
                     meadfindR.append(A[starty+yy, startx+xx, 2])
                     #print(meadfind)
             medianB = st.median(meadfindB)
-            print(medianB)
-            medianG = st.median(meadfindG)
-            medianR = st.median(meadfindR)
+            #medianG = st.median(meadfindG)
+            #medianR = st.median(meadfindR)
+            
             #print(median)
             for yy in range(100):
                 for xx in range(100):
                     B[starty+yy, startx+xx, 0] = medianB
-                    B[starty+yy, startx+xx, 1] = medianG
-                    B[starty+yy, startx+xx, 2] = medianR
+                    B[starty+yy, startx+xx, 1] = A[starty+yy, startx+xx, 1]
+                    B[starty+yy, startx+xx, 2] = A[starty+yy, startx+xx, 1]
             meadfindB = [0]
             meadfindG = [0]
             meadfindR = [0]
+    print(HSVvals)
 
 def Meanifier(A, B):
 
@@ -99,6 +101,38 @@ def Meanifier(A, B):
             medianB = st.mean(meadfindB)
             medianG = st.mean(meadfindG)
             medianR = st.mean(meadfindR)
+            #print(median)
+            for yy in range(100):
+                for xx in range(100):
+                    B[starty+yy, startx+xx, 0] = medianB
+                    B[starty+yy, startx+xx, 1] = medianG
+                    B[starty+yy, startx+xx, 2] = medianR
+            meadfindB = [0]
+            meadfindG = [0]
+            meadfindR = [0]
+
+def Modeifier(A, B):
+
+    meadfindB = [0]
+    meadfindG = [0]
+    meadfindR = [0]
+
+    for y in range(5):
+        starty = y*100
+        print("y" + str(starty))
+        for x in range(5):
+            startx = x*100
+            print("x" + str(startx))
+            for yy in range(100):
+                for xx in range(100):
+                    #print(starty+yy, startx+xx)
+                    meadfindB.append(A[starty+yy, startx+xx, 0])
+                    meadfindG.append(A[starty+yy, startx+xx, 1])
+                    meadfindR.append(A[starty+yy, startx+xx, 2])
+                    #print(meadfind)
+            medianB = st.mode(meadfindB)
+            medianG = st.mode(meadfindG)
+            medianR = st.mode(meadfindR)
             #print(median)
             for yy in range(100):
                 for xx in range(100):
@@ -161,8 +195,8 @@ def MeanFilterColor(A, B, z):
 
 #MeanFilterColor(img, img_out, 10)
 
-Meanifier(img, img_out)
-Medaifier(img, img_outout)
+Modeifier(img, img_out)
+Medaifier(img_hue, img_outout)
 
 cv2.line(img,(100,0),(100,500),(255,255,255),2)
 cv2.line(img,(200,0),(200,500),(255,255,255),2)
@@ -180,7 +214,7 @@ print(img_out[50, 150])
 
 Split(img_out, img_outB, img_outG, img_outR)
 
-img_outgray = cv2.cvtColor(img_out, cv2.COLOR_BGR2GRAY)
+img_outgray = cv2.cvtColor(img_out, cv2.COLOR_HSV2BGR)
 
 img_out2 = cv2.subtract(img_outG, img_outB)
 img_out3 = cv2.subtract(img_out2, img_outR)
@@ -188,7 +222,7 @@ img_out3 = cv2.subtract(img_out2, img_outR)
 
 
 cv2.imshow("Original", img)
-cv2.imshow("Smoothed", img_out)
+cv2.imshow("Smoothed", img_outgray)
 cv2.imshow("Blue", img_outout)
 
 
