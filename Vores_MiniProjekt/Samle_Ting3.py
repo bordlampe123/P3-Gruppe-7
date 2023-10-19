@@ -64,11 +64,16 @@ def prominent(image_input):
         compactness,labels,centers = cv.kmeans(data,1,None,criteria,10,flags)
         return centers[0].astype('uint8')
 
+def prominent2(image_input):
+    Average_Color = np.average(image_input, axis=(0,1))
+    return Average_Color
+
 
 def Liste_Med_Underbilleders_Farver(input_sub_image_Matrix, ite, output_matrix1, output_matrix2):
     for i in range(ite):
         for j in range(ite):
-            output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j])
+            #output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j])
+            output_matrix1[i][j] = prominent2(input_sub_image_Matrix[i][j])
             output_matrix2[i][j] = cv.cvtColor(np.uint8([[output_matrix1[i][j]]]), cv.COLOR_BGR2HSV)[0][0]
             #output_matrix2[i][j] = pixel_hsv = cv.cvtColor(np.uint8([[pixel_bgr_Array]]), cv.COLOR_BGR2HSV)[0][0]
                 
@@ -78,14 +83,17 @@ def Liste_Med_Underbilleders_Farver_Special(input_sub_image_Matrix, ite, output_
     for i in range(ite):
         for j in range(ite):
             if i%4 == False or (i+1)%4 == False:
-                output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j])
+                output_matrix1[i][j] = prominent2(input_sub_image_Matrix[i][j])
             else:
                 if j%4 == False or (j+1)%4 == False:#1,3,4,7,8
-                    output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j]) 
+                    output_matrix1[i][j] = prominent2(input_sub_image_Matrix[i][j]) 
                 elif (j-1)%4 == False:#1,5,9
-                    output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j-1])
+                    #output_matrix1[i][j] = prominent2(input_sub_image_Matrix[i][j-1])
+                    output_matrix1[i][j] = (prominent2(input_sub_image_Matrix[i][j-1])+prominent2(input_sub_image_Matrix[i][j+2]))/2
+                    #print((prominent(input_sub_image_Matrix[i][j-1])+prominent(input_sub_image_Matrix[i][j+2])))
+                    #print()
                 elif (j+2)%4 == False:#2,6,10
-                    output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j+1])
+                    output_matrix1[i][j] = (prominent2(input_sub_image_Matrix[i][j+1])+prominent2(input_sub_image_Matrix[i][j-2]))/2
                 #else: output_matrix1[i][j] = [0,0,0]
 
 
@@ -331,14 +339,12 @@ for i in range(1, image_Count+1):
     Gem_Alle_Billeder(template, size2, sub_Image_Matrix2, sub_Image_Size2)
     Liste_Med_Underbilleders_Farver(sub_Image_Matrix2, size2, color_Array, color_Array2)
     Tegn_Firkanter_Special(size, template2, sub_Image_Size2, color_Array)
-    #print(color_Array[0][0], color_Array2[0][0])
+
     Type_Finder(color_Array2, TileArray)
     print(TileArray)
-    #print(Mine_Tresh[0])
-    #print(Mine_Tresh[1])
+
     Tegn_Firkanter_Special2(size, template3, sub_Image_Size2, TileArray, color_List)
 
-    #lav_en_pixels_billede_HSV((42, 193, 148))
     Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
 
 #Viewer(template2)
