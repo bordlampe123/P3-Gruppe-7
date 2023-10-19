@@ -4,7 +4,7 @@ import math
 import os
 
 # Load the image
-image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/1.jpg")
+image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/19.jpg")
 cv.imshow("board", image)   
 
 # Split the image into RGB channels
@@ -137,7 +137,7 @@ print(matches)
 
 
 
-
+cv.imshow("subimage", subimages[3,0])
 
 
 cv.imshow("image", gray_img)
