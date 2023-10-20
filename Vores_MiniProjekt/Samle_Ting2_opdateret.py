@@ -208,11 +208,6 @@ def Tile_Assert(input):
 
 
 
-
-
-
-
-
 #Nicklas funktioner
 def grassfire(img,coord,id):
     y,x = coord
@@ -247,7 +242,6 @@ def grassfire(img,coord,id):
     return id
 
 
-
 def crownCounter(crown,y,x):
     krone = crown[y,x]
     for z in range(len(blobs)):
@@ -258,11 +252,6 @@ def crownCounter(crown,y,x):
                     return
             except Exception:
                 pass 
-
-
-
-
-
 
 
 def Viewer(input, input2, input3, input4):
@@ -307,21 +296,6 @@ color_Array2 = np.zeros((size2, size2, color_Level), dtype='uint8')
 sub_Image_Matrix2 = np.zeros((size2, size2, sub_Image_Size2, sub_Image_Size2, color_Level), dtype='uint8')
 TileArray = np.zeros((size2, size2, color_Level+1), dtype='uint8')
 color_List = [[42, 193, 148],[26, 233, 189],[42, 176, 68],[104, 206, 129],[23, 124, 111],[22, 130,  51]]
-
-
-img = np.array([[11,13,12,12,12],
-                 [11,12,12,12,11],
-                 [11,14,17,12,11],
-                 [11,14,13,11,11],
-                 [12,13,13,11,15]])
-
-
-crown = np.array([[0,0,0,0,0],
-                   [0,0,0,1,0],
-                   [0,1,0,0,0],
-                   [0,2,0,2,1],
-                   [0,1,0,1,0]])
-                  
           
 
 Nid = 50
@@ -385,25 +359,6 @@ for i in range(1, image_Count+1):
             CrownRow = y // (image_Size // 5)
             CrownColumn = x // (image_Size // 5)
             Crowns[CrownRow, CrownColumn] += 1
-            
-
-    #loc = np.where(res >= threshold)
-    #for pt in zip(*loc[::-1]):
-    # cv.rectangle(input, pt, (pt[0]+w, pt[1]+h), (0,0,255), 2)
-
-    #cv.imwrite('res.png',input)
-
-    #output = res.copy()
-
-    #for y in range(res.shape[0]):
-        #for x in range(res.shape[1]):
-            #if res[y,x] < threshold:
-                #output[y,x] = 0
-            #else:
-                #output[y,x] = 255
-
-    #show the final image with the matched area
-    #miniks_viewer()
 
     #Nicklas kode
     for y in range(5):
