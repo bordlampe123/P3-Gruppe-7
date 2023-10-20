@@ -4,17 +4,11 @@ import math
 import os
 
 # Load the image
-image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/59.jpg")
+image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/37.jpg")
 cv.imshow("board", image)   
 
 # Split the image into RGB channels
 B, G, R = cv.split(image)
-
-# Subtract the green channel from the red channel - Mortens
-GBSub = cv.subtract(G, B)
-
-# Subtract the blue channel from the red channel - Mortens
-BRSub = cv.subtract(B, R)
 
 # Subtract the red channel from the green channel
 GRSub = cv.subtract(G, R)
@@ -37,11 +31,6 @@ BGBSub = cv.subtract(BSub, BGSub)
 # Subtracting RBSub from GBGSub
 FinalImage = cv.subtract(BGBSub, RBSub)
 #cv.imshow("FinalImage", FinalImage)
-
-BRBSub = cv.subtract(B, RBSub)
-
-# Subtracting BRBSub from BRSub - Mortens
-FinalImage2 = cv.subtract(BRBSub, BRSub)  
 
 # Convert the image to the grayscale color space
 gray_img = cv.merge((FinalImage, FinalImage, FinalImage))
@@ -77,7 +66,7 @@ crowns = np.zeros((5,5), dtype=int)
 
 for k in range(len(Templates)):
     res = cv.matchTemplate(gray_img, Templates[k], cv.TM_CCOEFF_NORMED)
-    loc = np.where(res >= 0.6)
+    loc = np.where(res >= 0.56) #0.56 
     
     UniquePoints = []
     MatchPoints = list(zip(*loc[::-1]))
