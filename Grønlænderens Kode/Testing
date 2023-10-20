@@ -4,7 +4,7 @@ import math
 import os
 
 # Load the image
-image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/37.jpg")
+image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/38.jpg")
 cv.imshow("board", image)   
 
 # Split the image into RGB channels

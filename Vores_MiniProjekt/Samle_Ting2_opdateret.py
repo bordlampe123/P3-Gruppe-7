@@ -206,16 +206,26 @@ def Tile_Assert(input):
     return output
 
 
-
-
-
 def Viewer(input, input2, input3, input4):
     cv.imshow("Test1", input)
     cv.imshow("Test2", input2)
     cv.imshow("Test3", input3)
     cv.imshow("Test4", input4)
-    cv.waitKey()
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
+
+#Denne funktion processere billedet så der kan lave template matching på det
+def SubtractImg (image):
+    B, G, R = cv.split(image)
+    GRSub = cv.subtract(G, R)
+    BGSub = cv.subtract(B, G)
+    RBSub = cv.subtract(R, B)
+    BSub = cv.subtract(B, GRSub)
+    BGBSub = cv.subtract(BSub, BGSub)
+    CrownImage = cv.subtract(BGBSub, RBSub)
+    CrownImage = cv.merge((CrownImage, CrownImage, CrownImage))
+    return CrownImage
 
 #Vars som kan ændres fra run til run
 image_Count = 74
@@ -262,21 +272,35 @@ for i in range(1, image_Count+1):
 
     #Miniks kode
 
-    img_gray = cv.cvtColor(library_Of_Images[f'image{i}'], cv.COLOR_BGR2GRAY)
+    CrownImage = SubtractImg(library_Of_Images[f'image{i}'])
+    Crowns = np.zeros((5,5), dtype=int)
 
     #defining the template
-    template = cv.imread("Vores_MiniProjekt\krone.png", cv.IMREAD_COLOR)
-    template_gray = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
+    CrownTemplate = cv.imread("Vores_MiniProjekt/Crown_bw.png", cv.IMREAD_COLOR)
 
-    img_HSV = cv.cvtColor(template, cv.COLOR_BGR2HSV)
+    Templates = [CrownTemplate, cv.rotate(CrownTemplate, cv.ROTATE_90_CLOCKWISE), cv.rotate(CrownTemplate, cv.ROTATE_180), cv.rotate(CrownTemplate, cv.ROTATE_90_COUNTERCLOCKWISE)]
 
-    w, h = template_gray.shape[::-1]
-
-    #perform match operations
-    res = cv.matchTemplate(library_Of_Images[f'image{i}'], template, cv.TM_CCOEFF)
-
-    #specify a threshold
-    threshold = 0.1
+    #perform match operations000
+    for k in range(len(Templates)):
+        res = cv.matchTemplate(CrownImage, Templates[k], cv.TM_CCOEFF_NORMED)
+        loc = np.where(res >= 0.56)
+        UniquePoints = []
+        MatchPoints = list(zip(*loc[::-1]))
+        for match in MatchPoints:
+            Unique = True
+            for entries in UniquePoints:
+                if math.sqrt((match[0] - entries[0])**2 + (match[1] - entries[1])**2) < 10:
+                    Unique = False
+                    break
+            if Unique:
+                UniquePoints.append(match)
+        for pt in UniquePoints:
+            x, y = pt
+            CrownRow = y // (image_Size // 5)
+            CrownColumn = x // (image_Size // 5)
+            Crowns[CrownRow, CrownColumn] += 1
+            
+    print(Crowns)
 
     #loc = np.where(res >= threshold)
     #for pt in zip(*loc[::-1]):
@@ -284,22 +308,20 @@ for i in range(1, image_Count+1):
 
     #cv.imwrite('res.png',input)
 
-    output = res.copy()
+    #output = res.copy()
 
-    for y in range(res.shape[0]):
-        for x in range(res.shape[1]):
-            if res[y,x] < threshold:
-                output[y,x] = 0
-            else:
-                output[y,x] = 255
+    #for y in range(res.shape[0]):
+        #for x in range(res.shape[1]):
+            #if res[y,x] < threshold:
+                #output[y,x] = 0
+            #else:
+                #output[y,x] = 255
 
     #show the final image with the matched area
     cv.imshow('input',library_Of_Images[f'image{i}'])
-    cv.imshow('img_HSV',img_HSV)
-    cv.imshow('img_gray',img_gray)
+    cv.imshow('CrownImage',CrownImage)
     cv.imshow('res',res)
     cv.imshow('template',template)
-    cv.imshow('output',output)
     cv.waitKey(0)   
     cv.destroyAllWindows()
 
