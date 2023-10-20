@@ -4,7 +4,7 @@ import math
 import os
 
 # Load the image
-image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/38.jpg")
+image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/19.jpg")
 cv.imshow("board", image)   
 
 # Split the image into RGB channels
@@ -66,7 +66,7 @@ crowns = np.zeros((5,5), dtype=int)
 
 for k in range(len(Templates)):
     res = cv.matchTemplate(gray_img, Templates[k], cv.TM_CCOEFF_NORMED)
-    loc = np.where(res >= 0.56) #0.56 
+    loc = np.where(res >= 0.57) #0.56 
     
     UniquePoints = []
     MatchPoints = list(zip(*loc[::-1]))
