@@ -360,6 +360,8 @@ for i in range(1, image_Count+1):
 
     Templates = [CrownTemplate, cv.rotate(CrownTemplate, cv.ROTATE_90_CLOCKWISE), cv.rotate(CrownTemplate, cv.ROTATE_180), cv.rotate(CrownTemplate, cv.ROTATE_90_COUNTERCLOCKWISE)]
 
+    th, tw, channels = CrownTemplate.shape
+
     #perform match operations000
     for k in range(len(Templates)):
         res = cv.matchTemplate(CrownImage, Templates[k], cv.TM_CCOEFF_NORMED)
@@ -378,6 +380,7 @@ for i in range(1, image_Count+1):
             if Unique:
                 UniquePoints.append(match)
         for pt in UniquePoints:
+            cv.rectangle(library_Of_Images[f'image{i}'], pt, (pt[0]+th, pt[1]+tw), (0,0,255), 2)
             x, y = pt
             CrownRow = y // (image_Size // 5)
             CrownColumn = x // (image_Size // 5)
