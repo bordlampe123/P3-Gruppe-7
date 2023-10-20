@@ -198,12 +198,68 @@ def Type_Finder(input):
 
 
 def Tile_Assert(input):
-    output = np.zeros((5,5,1))
+    output = np.zeros((5,5))
     for i in range(5):
         for j in range(5):
             output[i][j] = input[i][j][3]
     
     return output
+
+
+
+
+
+
+
+
+#Nicklas funktioner
+def grassfire(img,coord,id):
+    y,x = coord
+    burn_queue = []  
+    group = []
+    
+    if (y,x) in list:
+        return id
+    else:
+        type = img[y,x]
+        burn_queue.append((y,x))
+        
+    while len(burn_queue) > 0:
+        current = burn_queue.pop()
+        y,x = current
+        if current not in group:
+            group.append((y,x))
+            list.append((y,x))
+            img[y,x] = id
+            if x+1 < img.shape[1] and img[y,x+1] == type:
+                burn_queue.append((y,x+1))
+            if x > 0 and img[y,x-1] == type:
+                burn_queue.append((y,x-1))
+            if y+1 < img.shape[0] and img[y+1,x] == type:
+                burn_queue.append((y+1,x))
+            if y > 0 and img[y-1,x] == type:
+                burn_queue.append((y-1,x))
+        
+        if len(burn_queue) ==0:
+            blobs.append(group)
+            print(img)
+            return id+1
+    return id
+
+
+
+def crownCounter(crown,y,x):
+    krone = crown[y,x]
+    for z in range(len(blobs)):
+        for w in range(len(blobs[z])):
+            try:
+                if blobs[z][w][0] == y and blobs[z][w][1] == x:
+                    blobs[z][w] = krone
+                    return
+            except Exception:
+                pass 
+
+
 
 
 
@@ -217,8 +273,21 @@ def Viewer(input, input2, input3, input4):
     cv.waitKey()
 
 
+def miniks_viewer():
+    cv.imshow('input',library_Of_Images[f'image{i}'])
+    cv.imshow('img_HSV',img_HSV)
+    cv.imshow('img_gray',img_gray)
+    cv.imshow('res',res)
+    cv.imshow('template',template)
+    cv.imshow('output',output)
+    cv.waitKey(0)   
+    cv.destroyAllWindows()
+
+
+
+
 #Vars som kan ændres fra run til run
-image_Count = 74
+image_Count = 1
 image_Size = 500
 sub_Image_Size = 25
 resolution_In_Drawn_Squares = int((500**2)/(sub_Image_Size**2))
@@ -241,6 +310,29 @@ TileArray = np.zeros((size2, size2, color_Level+1), dtype='uint8')
 color_List = [[42, 193, 148],[26, 233, 189],[42, 176, 68],[104, 206, 129],[23, 124, 111],[22, 130,  51]]
 
 
+img = np.array([[11,13,12,12,12],
+                 [11,12,12,12,11],
+                 [11,14,17,12,11],
+                 [11,14,13,11,11],
+                 [12,13,13,11,15]])
+
+
+crown = np.array([[0,0,0,0,0],
+                   [0,0,0,1,0],
+                   [0,1,0,0,0],
+                   [0,2,0,2,1],
+                   [0,1,0,1,0]])
+                  
+          
+
+Nid = 1
+blobs = []
+list = []
+sumP = 0  
+
+
+
+
 Dictionary_generator(image_Count, path, library_Of_Images)
 
 for i in range(1, image_Count+1):
@@ -256,9 +348,10 @@ for i in range(1, image_Count+1):
     Tegn_Firkanter_Special2(size, template3, sub_Image_Size2, TileArray, color_List)
     
     TileArray_Kun_Type = Tile_Assert(TileArray)
-    print(TileArray_Kun_Type)
-
-    Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
+    print(TileArray_Kun_Type.dtype)
+    TileArray_Kun_Type = TileArray_Kun_Type.astype(int)
+    print(TileArray_Kun_Type.dtype)
+    #Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
 
     #Miniks kode
 
@@ -294,14 +387,25 @@ for i in range(1, image_Count+1):
                 output[y,x] = 255
 
     #show the final image with the matched area
-    cv.imshow('input',library_Of_Images[f'image{i}'])
-    cv.imshow('img_HSV',img_HSV)
-    cv.imshow('img_gray',img_gray)
-    cv.imshow('res',res)
-    cv.imshow('template',template)
-    cv.imshow('output',output)
-    cv.waitKey(0)   
-    cv.destroyAllWindows()
+    #miniks_viewer()
+
+    #Nicklas kode
+    print(TileArray_Kun_Type)
+    print("her")
+    for y in range(5):
+        for x in range(5):
+            print("ite", Nid)
+            Nid = grassfire(TileArray_Kun_Type, (y, x),Nid)
+            
+    for y in range(crown.shape[0]):
+            for x in range(crown.shape[1]):
+                crownCounter(crown,y,x)
+
+    for x in range(len(blobs)):
+        sumP = sumP + len(blobs[x])*sum(blobs[x])
+        print(len(blobs[x])*sum(blobs[x]))
+    print("den samlet værdi er", sumP)
+    #Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
 
 
 
