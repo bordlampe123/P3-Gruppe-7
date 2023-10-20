@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import math
+import os
 
 path = 'Vores_MiniProjekt\King Domino dataset\King Domino dataset\Cropped and perspective corrected boards\\'
 
@@ -218,7 +219,7 @@ def grassfire(img,coord,id):
     burn_queue = []  
     group = []
     
-    if (y,x) in list:
+    if (y,x) in list_N:
         return id
     else:
         type = img[y,x]
@@ -229,7 +230,7 @@ def grassfire(img,coord,id):
         y,x = current
         if current not in group:
             group.append((y,x))
-            list.append((y,x))
+            list_N.append((y,x))
             img[y,x] = id
             if x+1 < img.shape[1] and img[y,x+1] == type:
                 burn_queue.append((y,x+1))
@@ -242,7 +243,6 @@ def grassfire(img,coord,id):
         
         if len(burn_queue) ==0:
             blobs.append(group)
-            print(img)
             return id+1
     return id
 
@@ -324,9 +324,9 @@ crown = np.array([[0,0,0,0,0],
                   
           
 
-Nid = 1
+Nid = 50
 blobs = []
-list = []
+list_N = []
 sumP = 0  
 
 
@@ -347,9 +347,7 @@ for i in range(1, image_Count+1):
     Tegn_Firkanter_Special2(size, template3, sub_Image_Size2, TileArray, color_List)
     
     TileArray_Kun_Type = Tile_Assert(TileArray)
-    print(TileArray_Kun_Type.dtype)
     TileArray_Kun_Type = TileArray_Kun_Type.astype(int)
-    print(TileArray_Kun_Type.dtype)
     #Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
 
     #Miniks kode
@@ -365,9 +363,12 @@ for i in range(1, image_Count+1):
     #perform match operations000
     for k in range(len(Templates)):
         res = cv.matchTemplate(CrownImage, Templates[k], cv.TM_CCOEFF_NORMED)
-        loc = np.where(res >= 0.56)
+        loc = np.where(res >= 0.57)
+        loc2 = np.zeros((0))
+        
         UniquePoints = []
         MatchPoints = list(zip(*loc[::-1]))
+        #MatchPoints = list(zip(loc[:,:,-1], loc[:,:,-1]))
         for match in MatchPoints:
             Unique = True
             for entries in UniquePoints:
@@ -382,7 +383,6 @@ for i in range(1, image_Count+1):
             CrownColumn = x // (image_Size // 5)
             Crowns[CrownRow, CrownColumn] += 1
             
-    print(Crowns)
 
     #loc = np.where(res >= threshold)
     #for pt in zip(*loc[::-1]):
@@ -403,22 +403,22 @@ for i in range(1, image_Count+1):
     #miniks_viewer()
 
     #Nicklas kode
-    print(TileArray_Kun_Type)
-    print("her")
     for y in range(5):
         for x in range(5):
-            print("ite", Nid)
             Nid = grassfire(TileArray_Kun_Type, (y, x),Nid)
             
-    for y in range(crown.shape[0]):
-            for x in range(crown.shape[1]):
-                crownCounter(crown,y,x)
+    for y in range(Crowns.shape[0]):
+            for x in range(Crowns.shape[1]):
+                crownCounter(Crowns,y,x)
 
     for x in range(len(blobs)):
         sumP = sumP + len(blobs[x])*sum(blobs[x])
-        print(len(blobs[x])*sum(blobs[x]))
+        #print(len(blobs[x])*sum(blobs[x]))
+    print("array med typer", TileArray_Kun_Type)
+    print("Krone array", Crowns)
     print("den samlet værdi er", sumP)
-    #Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
+
+    Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
 
 
 
