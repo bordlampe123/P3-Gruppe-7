@@ -1,0 +1,321 @@
+import cv2
+import numpy as np
+import statistics as st
+
+img = cv2.imread("Pierres Mappe/Kingdomino/Billeder/10.jpg")
+
+img_blurred = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
+img_mean = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
+img_old_mean = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
+
+img_spice = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
+img_small = np.zeros((20, 20, 3), np.uint8)
+img_small_big = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
+
+id = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+
+
+
+
+
+img_outB = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+img_outG = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+img_outR = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+img_MeanGray = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+img_MeanGrayBlurred = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+
+img_Meadows = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+img_Forest = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
+
+current_id = 1
+
+def increment():
+    global current_id
+    current_id += 1
+
+
+
+def Split(A, B, G, R):
+    for y in range(A.shape[0]):
+        for x in range(A.shape[1]):
+            B[y, x] = A[y, x, 0]
+            G[y, x] = A[y, x, 1]
+            R[y, x] = A[y, x, 2]
+
+
+def MeanFilterColor(A, B, z):
+
+    kernel = np.ones((z*2+1, z*2+1), np.uint8)
+
+    for y in range(z, img.shape[0]-z):
+        starty = y-z    
+        for x in range(z, img.shape[1]-z):
+            startx = x-z
+
+            sum = np.zeros(3)
+
+            for yy in range(kernel.shape[0]):
+                for xx in range(kernel.shape[1]):
+                    sum = np.add(sum, A[starty+yy, startx+xx])
+
+            sumnorm = np.divide(sum, kernel.shape[0]**2)        
+
+            B[y, x] = sumnorm
+
+def Meanifier(A, B, C):
+
+    meadfindB = []
+    meadfindG = []
+    meadfindR = []
+
+    for y in range(20):
+        starty = y*25
+        #print("y" + str(starty))
+        for x in range(20):
+            startx = x*25
+            #print("x" + str(startx))
+            for yy in range(25):
+                for xx in range(25):
+                    #print(starty+yy, startx+xx)
+                    meadfindB.append(A[starty+yy, startx+xx, 0])
+                    meadfindG.append(A[starty+yy, startx+xx, 1])
+                    meadfindR.append(A[starty+yy, startx+xx, 2])
+                    #print(meadfind)
+            medianB = st.mean(meadfindB)
+            medianG = st.mean(meadfindG)
+            medianR = st.mean(meadfindR)
+            C[y, x, 0] = medianB
+            C[y, x, 1] = medianG
+            C[y, x, 2] = medianR
+            #print(median)
+            for yy in range(25):
+                for xx in range(25):
+                    B[starty+yy, startx+xx, 0] = medianB
+                    B[starty+yy, startx+xx, 1] = medianG
+                    B[starty+yy, startx+xx, 2] = medianR
+            meadfindB = []
+            meadfindG = []
+            meadfindR = []
+
+def OldMeanifier(A, B):
+
+    meadfindB = [0]
+    meadfindG = [0]
+    meadfindR = [0]
+
+    for y in range(5):
+        starty = y*100
+        #print("y" + str(starty))
+        for x in range(5):
+            startx = x*100
+            #print("x" + str(startx))
+            for yy in range(100):
+                for xx in range(100):
+                    #print(starty+yy, startx+xx)
+                    meadfindB.append(A[starty+yy, startx+xx, 0])
+                    meadfindG.append(A[starty+yy, startx+xx, 1])
+                    meadfindR.append(A[starty+yy, startx+xx, 2])
+                    #print(meadfind)
+            medianB = st.mean(meadfindB)
+            medianG = st.mean(meadfindG)
+            medianR = st.mean(meadfindR)
+            #print(median)
+            for yy in range(100):
+                for xx in range(100):
+                    B[starty+yy, startx+xx, 0] = medianB
+                    B[starty+yy, startx+xx, 1] = medianG
+                    B[starty+yy, startx+xx, 2] = medianR
+            meadfindB = [0]
+            meadfindG = [0]
+            meadfindR = [0]
+
+def MeanifierSmall(A, B):
+
+    meadfindB = []
+    meadfindG = []
+    meadfindR = []
+
+    for y in range(5):
+        starty = y*4
+        #print("y" + str(starty))
+        for x in range(5):
+            startx = x*4
+
+            #print("x" + str(startx))
+            for yy in range(4):
+                for xx in range(4):
+                    if (starty+yy+1)%4 == 0 or (starty+yy)%4 == 0 or (startx+xx+1)%4 == 0 or (startx+xx)%4 == 0:
+                        #print(starty+yy, startx+xx)
+                        meadfindB.append(A[starty+yy, startx+xx, 0])
+                        meadfindG.append(A[starty+yy, startx+xx, 1])
+                        meadfindR.append(A[starty+yy, startx+xx, 2])
+                        #print(meadfind)
+            medianB = st.mean(meadfindB)
+            medianG = st.mean(meadfindG)
+            medianR = st.mean(meadfindR)
+
+            #print(median)
+            for yy in range(100):
+                for xx in range(100):
+                    B[starty*25+yy, startx*25+xx, 0] = medianB
+                    B[starty*25+yy, startx*25+xx, 1] = medianG
+                    B[starty*25+yy, startx*25+xx, 2] = medianR
+            meadfindB = []
+            meadfindG = []
+            meadfindR = []
+
+
+def MeanifierGray(A, B):
+
+    meadfind = [0]
+
+    for y in range(20):
+        starty = y*25
+        #print("y" + str(starty))
+        for x in range(20):
+            startx = x*25
+            #print("x" + str(startx))
+            for yy in range(25):
+                for xx in range(25):
+                    #print(starty+yy, startx+xx)
+                    meadfind.append(A[starty+yy, startx+xx])
+                    #print(meadfind)
+            median = st.mean(meadfind)
+            #print(median)
+            for yy in range(25):
+                for xx in range(25):
+                    B[starty+yy, startx+xx] = median
+
+            meadfind = [0]
+
+def Thresh(A, B, z, t):
+    for y in range(A.shape[0]):
+        for x in range(A.shape[1]):
+            if z <= A[y, x] <= t:
+                B[y, x] = 255
+            else:
+                B[y, x] = 0
+
+def PutHSV(A):
+
+    hsv = cv2.cvtColor(A, cv2.COLOR_BGR2HSV)
+
+    font                   = cv2.FONT_HERSHEY_SIMPLEX
+    
+    fontScale              = 0.35
+    fontColor              = (255,255,255)
+    thickness              = 1
+    lineType               = 2
+
+
+
+    for y in range(5):
+        for x in range(5):
+            bottomLeftCornerOfText = (x*100,y*100+50)
+            cv2.putText(A,str(hsv[y*100,x*100]), 
+            bottomLeftCornerOfText, 
+            font, 
+            fontScale,
+            fontColor,
+            thickness,
+            lineType)
+
+def ignite(y, x, A):
+
+    hsv = cv2.cvtColor(A, cv2.COLOR_BGR2HSV)
+    
+    queue = []
+
+    if hsv[y, x, 0]-10 <= hsv[y, x, 0] <= hsv[y, x, 0]+10 and hsv[y, x, 2]-40 <= hsv[y, x, 2] <= hsv[y, x, 2]+40 and id[y, x, 0] == 0:
+        queue.append([y, x])
+    
+        while len(queue) > 0:
+
+            temp = queue.pop()
+
+            posy = temp[0]
+            posx = temp[1]
+
+            id[posy, posx, 0] = current_id
+
+            print(posy, posx)
+
+            if hsv[posy-1, posx, 0]-10 <= hsv[posy-1, posx, 0] <= hsv[posy-1, posx, 0]+10 and hsv[posy-1, posx, 2]-40 <= hsv[posy-1, posx, 2] <= hsv[posy-1, posx, 2]+40 and id[posy-1, posx, 0] == 0:
+                queue.append([posy-1, posx])
+            
+            if hsv[posy, posx-1, 0]-10 <= hsv[posy, posx-1, 0] <= hsv[posy, posx-1, 0]+10 and hsv[posy, posx-1, 2]-40 <= hsv[posy, posx-1, 2] <= hsv[posy, posx-1, 2]+40 and id[posy, posx-1, 0] == 0:
+                queue.append([posy, posx-1])
+
+            if hsv[posy+1, posx, 0]-10 <= hsv[posy+1, posx, 0] <= hsv[posy+1, posx, 0]+10 and hsv[posy+1, posx, 2]-40 <= hsv[posy+1, posx, 2] <= hsv[posy+1, posx, 2]+40 == 255 and id[posy+1, posx, 0] == 0:
+                queue.append([posy+1, posx])
+
+            if hsv[posy, posx+1, 0]-10 <= hsv[posy, posx+1, 0] <= hsv[posy, posx+1, 0]+10 and hsv[posy, posx+1, 2]-40 <= hsv[posy, posx+1, 2] <= hsv[posy, posx+1, 2]+40 == 255 and id[posy, posx+1, 0] == 0:
+                queue.append([posy, posx+1])
+        
+        increment()
+
+
+Meanifier(img, img_mean, img_small)
+OldMeanifier(img, img_old_mean)
+MeanifierSmall(img_small, img_small_big)
+
+#MeanFilterColor(img, img_blurred, 10)
+Split(img, img_outB, img_outG, img_outR)
+
+img_GsubB = cv2.subtract(img_outG, img_outB)
+img_GsubBsubR = cv2.subtract(img_GsubB, img_outR)
+img_GsubR = cv2.subtract(img_outG, img_outR)
+
+alpha = 10
+beta = 1
+
+#adjusted = cv2.convertScaleAbs(img_GsubBsubR, alpha=alpha, beta=beta)
+#blurred = cv2.blur(adjusted,(10,10))
+
+#MeanifierGray(adjusted, img_MeanGray)
+#MeanifierGray(blurred, img_MeanGrayBlurred)
+
+#Thresh(img_MeanGray, img_Meadows, 50, 255)
+#Thresh(img_MeanGray, img_Forest, 10, 47)
+
+for y in range(img.shape[0]):
+    for x in range(img.shape[1]):
+        img_spice[y, x, 0] = img_GsubB[y, x]
+        img_spice[y, x, 1] = img_GsubBsubR[y, x]
+        img_spice[y, x, 2] = img_outB[y, x]
+
+cv2.imshow("Blue", img_outB)
+cv2.imshow("Green", img_outG)
+cv2.imshow("Red", img_outR)
+cv2.imshow("Green % Blue", img_GsubB)
+cv2.imshow("Green % Red", img_GsubR)
+cv2.imshow("Green % Blue % Red", img_GsubBsubR)
+cv2.imshow("Spicy", img_spice)
+
+
+PutHSV(img_small_big)
+cv2.imshow("Small to big", img_small_big)
+PutHSV(img_old_mean)
+cv2.imshow("Old Mean", img_old_mean)
+
+
+
+#cv2.imshow("Contrasted", adjusted)
+#cv2.imshow("Gray Mean", img_MeanGray)
+#cv2.imshow("Threshed M", img_Meadows)
+#cv2.imshow("Threshed F", img_Forest)
+
+
+#cv2.imshow("Gray Blurred", blurred)
+#cv2.imshow("Gray Mean Blurred", img_MeanGrayBlurred)
+
+
+
+
+
+
+cv2.imshow("Original", img)
+#cv2.imshow("Blurred", img_blurred)
+cv2.imshow("Mean", img_mean)
+
+cv2.waitKey(0)
