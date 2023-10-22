@@ -324,11 +324,11 @@ def process_picture(picture_path):
     MeanifierSmall(img_small_G, img_small_big_G)
 
     Thresh(img_small_big, img_Meadows, 25, 60, 255)
-    Thresh(img_small_big, img_Forest, 5, 21, 255)
+    Thresh(img_small_big, img_Forest, 4, 21, 255)
     Thresh(img_small_big_RG, img_Waste, 5, 19, 255)
-    Thresh(img_small_big_RGB, img_Field, 5, 22, 255)
+    Thresh(img_small_big_RGB, img_Field, 4, 36, 255)
     Thresh(img_small_big_BR, img_Ocean, 80, 255, 255)
-    Thresh(img_small_big_G, img_Mines, 100, 180, 255)
+    Thresh(img_small_big_G, img_Mines, 100, 188, 255)
 
     for y in range(img_Waste.shape[0]):
         for x in range(img_Waste.shape[1]):
