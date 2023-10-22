@@ -258,7 +258,8 @@ def crownCounter(crown,y,x):
 def Viewer(input, input2, nr):
     cv.imshow(f"billed {nr}", input)
     cv.imshow("Kroner", input2)
-    cv.waitKey(0)
+    cv.waitKey()
+    cv.destroyAllWindows()
 
 
 #Denne funktion processere billedet så der kan lave template matching på det
