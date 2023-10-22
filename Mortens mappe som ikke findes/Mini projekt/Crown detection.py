@@ -7,7 +7,7 @@ import numpy as np
     #leg evt med tresholds
 
 # Read the main image
-img = cv2.imread("C:/Users/stron/PycharmProjects/P3-Gruppe-7/Mortens mappe som ikke findes/Mini projekt/King Domino dataset/Cropped and perspective corrected boards/10.jpg")
+img = cv2.imread("C:/Users/stron/PycharmProjects/P3-Gruppe-7/Mortens mappe som ikke findes/Mini projekt/King Domino dataset/Cropped and perspective corrected boards/48.jpg")
 
 #make new images to place the new color chanels into
 
@@ -142,18 +142,38 @@ def filter_close_points(points, threshold):
 #here the crowns are filterd using the filter_close_points fuction that looks at the next point in the array and determines if it is the same crow
 result1 = filter_close_points(np.column_stack(loc1), 5)
 
-print(result1)
-
 result2 = filter_close_points(np.column_stack(loc2), 5)
-
-print(result2)
 
 result3 = filter_close_points(np.column_stack(loc3), 5)
 
-print(result3)
-
 result4 = filter_close_points(np.column_stack(loc4), 5)
-print(result4)
+
+
+
+all_results = result1 + result2 + result3 + result4
+all_results.sort()
+
+
+
+def filter_close_pointstupe(points, threshold):
+    result = []
+    for i in range(len(points)):
+        x1, y1 = points[i]
+        keep = True
+        for j in range(i + 1, len(points)):
+            x2, y2 = points[j]
+            distance = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            if distance < threshold:
+                keep = False
+                break
+        if keep:
+            result.append((x1, y1))
+    return result
+Final_Results = filter_close_pointstupe(all_results, 5)
+
+print(Final_Results)
+
+
 
 #now boxes are drawn around the crowns
  #for template 1
