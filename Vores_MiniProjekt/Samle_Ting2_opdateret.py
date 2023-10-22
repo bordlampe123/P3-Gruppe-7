@@ -46,6 +46,7 @@ def prominent(image_input):
         compactness,labels,centers = cv.kmeans(data,1,None,criteria,10,flags)
         return centers[0].astype('uint8')
 
+
 #Denne funktion tager matricen med underbillederne og finder den gennemsnitsfarven af billedet og giver det så som output i HSV og BGR
 def Liste_Med_Underbilleders_Farver(input_sub_image_Matrix, ite):
     output_matrix_BGR = np.zeros((20, 20, 3))
@@ -207,8 +208,7 @@ def Tile_Assert(input):
     return output
 
 
-
-#Nicklas funktioner
+#Gruppering og optælling af kroner
 def grassfire(img,coord,id):
     y,x = coord
     burn_queue = []  
@@ -254,11 +254,11 @@ def crownCounter(crown,y,x):
                 pass 
 
 
-def Viewer(input, input2, input3):
+def Viewer(input, input2, input3, input4):
     cv.imshow("Test1", input)
     cv.imshow("Test2", input2)
     cv.imshow("Test3", input3)
-    #cv.imshow("Test4", input4)
+    cv.imshow("Test4", input4)
     cv.waitKey(0)
 
 
@@ -274,8 +274,9 @@ def SubtractImg (image):
     CrownImage = cv.merge((CrownImage, CrownImage, CrownImage))
     return CrownImage
 
+
 #Vars som kan ændres fra run til run
-image_Count = 75
+image_Count = 79
 image_Size = 500
 sub_Image_Size = 25
 resolution_In_Drawn_Squares = int((500**2)/(sub_Image_Size**2))
@@ -298,18 +299,17 @@ TileArray = np.zeros((size2, size2, color_Level+1), dtype='uint8')
 color_List = [[42, 193, 148],[26, 233, 189],[42, 176, 68],[104, 206, 129],[23, 124, 111],[22, 130,  51]]
           
 
+Nid = 50
+blobs = []
+list_N = []
+sumP = 0  
 
 
-
-
+#Kode der skal køres
 Dictionary_generator(image_Count, path, library_Of_Images)
 
 for i in range(1, image_Count+1):
-    print("Billede: ", i)
-    Nid = 50
-    blobs = []
-    list_N = []
-    sumP = 0  
+    print("billede:", i)
     sub_Image_Matrix = Gem_Alle_Billeder(library_Of_Images[f'image{i}'], size, sub_Image_Size)
     color_Array = Liste_Med_Underbilleders_Farver_Special(sub_Image_Matrix, size)
     print(color_Array.shape)
@@ -322,22 +322,22 @@ for i in range(1, image_Count+1):
 
     TileArray = Type_Finder(color_Array2)
     Tegn_Firkanter_Special2(size, template3, sub_Image_Size2, TileArray, color_List)
-    
+
     TileArray_Kun_Type = Tile_Assert(TileArray)
     TileArray_Kun_Type = TileArray_Kun_Type.astype(int)
     #Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
 
-    #Miniks kode
 
+    #Crown detection
     CrownImage = SubtractImg(library_Of_Images[f'image{i}'])
     Crowns = np.zeros((5,5), dtype=int)
 
+
     #defining the template
     CrownTemplate = cv.imread("Vores_MiniProjekt/Crown_bw.png", cv.IMREAD_COLOR)
-
     Templates = [CrownTemplate, cv.rotate(CrownTemplate, cv.ROTATE_90_CLOCKWISE), cv.rotate(CrownTemplate, cv.ROTATE_180), cv.rotate(CrownTemplate, cv.ROTATE_90_COUNTERCLOCKWISE)]
-
     th, tw, channels = CrownTemplate.shape
+
 
     #perform match operations000
     for k in range(len(Templates)):
@@ -363,7 +363,13 @@ for i in range(1, image_Count+1):
             CrownColumn = x // (image_Size // 5)
             Crowns[CrownRow, CrownColumn] += 1
 
-    #Nicklas kode
+
+    #Gruppering og optælling af kroner
+    blobs = []
+    list_N = []
+    sumP = 0
+    print("array med types:")
+    print(TileArray_Kun_Type)
     for y in range(5):
         for x in range(5):
             Nid = grassfire(TileArray_Kun_Type, (y, x),Nid)
@@ -374,12 +380,14 @@ for i in range(1, image_Count+1):
 
     for x in range(len(blobs)):
         sumP = sumP + len(blobs[x])*sum(blobs[x])
-        #print(len(blobs[x])*sum(blobs[x]))
-    print("array med typer", TileArray_Kun_Type)
-    print("Krone array", Crowns)
-    print("den samlet værdi er", sumP)
+        
+    print("array med blobs:")
+    print(TileArray_Kun_Type)
+    print("Krone array:")
+    print(Crowns)
+    print("Den samlet værdi af spillepladen er", sumP)
 
-    Viewer(template2, template, library_Of_Images[f'image{i}'], )
+    Viewer(template, template2, template3, library_Of_Images[f'image{i}'], )
 
 
 
