@@ -275,7 +275,7 @@ def SubtractImg (image):
     return CrownImage
 
 #Vars som kan ændres fra run til run
-image_Count = 1
+image_Count = 79
 image_Size = 500
 sub_Image_Size = 25
 resolution_In_Drawn_Squares = int((500**2)/(sub_Image_Size**2))
@@ -311,12 +311,14 @@ Dictionary_generator(image_Count, path, library_Of_Images)
 for i in range(1, image_Count+1):
     sub_Image_Matrix = Gem_Alle_Billeder(library_Of_Images[f'image{i}'], size, sub_Image_Size)
     color_Array = Liste_Med_Underbilleders_Farver_Special(sub_Image_Matrix, size)
+    print(color_Array.shape)
     Tegn_Firkanter(size, template, sub_Image_Size, color_Array)
-    Tegn_Firkanter(size, template2, sub_Image_Size2, color_Array)
+
     sub_Image_Matrix2 = Gem_Alle_Billeder(template, size2, sub_Image_Size2)
     color_Array, color_Array2 = Liste_Med_Underbilleders_Farver(sub_Image_Matrix2, size2)
-    
     Tegn_Firkanter(size, template2, sub_Image_Size2, color_Array)
+
+
     TileArray = Type_Finder(color_Array2)
     Tegn_Firkanter_Special2(size, template3, sub_Image_Size2, TileArray, color_List)
     
@@ -376,7 +378,7 @@ for i in range(1, image_Count+1):
     print("Krone array", Crowns)
     print("den samlet værdi er", sumP)
 
-    Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
+    Viewer(template3, library_Of_Images[f'image{i}'], )
 
 
 
