@@ -124,7 +124,7 @@ def PutCount(A):
 
     font                   = cv2.FONT_HERSHEY_SIMPLEX
     
-    fontScale              = 0.35
+    fontScale              = 0.8
     fontColor              = (255,255,255)
     thickness              = 1
     lineType               = 2
@@ -233,7 +233,7 @@ def crowndetect(picture_path):
     #cv2.imshow("Only Blue", img_outB)
     #cv2.imshow("Only Green", img_outG)
     #cv2.imshow("Only Red", img_outR)
-    cv2.imshow("Original", img)
+    #cv2.imshow("Original", img)
     #cv2.waitKey(0)
 
 
@@ -325,41 +325,42 @@ def crowndetect(picture_path):
     #here the crowns are filterd using the filter_close_points fuction that looks at the next point in the array and determines if it is the same crow
     result1 = filter_close_points(np.column_stack(loc1), 5)
 
-    #print(result1)
-
     result2 = filter_close_points(np.column_stack(loc2), 5)
-
-    #print(result2)
 
     result3 = filter_close_points(np.column_stack(loc3), 5)
 
-    #print(result3)
-
     result4 = filter_close_points(np.column_stack(loc4), 5)
-    print(result4)
-    print(len(result3))
-    print(result2)
-    print(result1)
-    print(result4[0][0], result4[0][1])
-
-    if len(result4) != 0:
-        array4 = np.array(result4) 
-    if len(result4) != 0:
-        array3 = np.array(result4) 
-    if len(result4) != 0:
-        array2 = np.array(result4) 
-    if len(result4) != 0:
-        array1 = np.array(result4) 
 
 
-    # Convert to NumPy array
-    coordinates_array = np.concatenate([array4, array3, array2, array1])
 
-    print(coordinates_array)
+    all_results = result1 + result2 + result3 + result4
+    all_results.sort()
 
-    unique_array = np.unique(coordinates_array, axis=0)
 
-    print(unique_array)
+
+    def filter_close_pointstupe(points, threshold):
+        result = []
+        for i in range(len(points)):
+            x1, y1 = points[i]
+            keep = True
+            for j in range(i + 1, len(points)):
+                x2, y2 = points[j]
+                distance = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+                if distance < threshold:
+                    keep = False
+                    break
+            if keep:
+                result.append((x1, y1))
+        return result
+    Final_Results = filter_close_pointstupe(all_results, 5)
+
+    #print(Final_Results)
+
+    final_result_array = np.array(Final_Results)
+
+
+    #print(final_result_array)
+
 
 
     #now boxes are drawn around the crowns
@@ -382,7 +383,7 @@ def crowndetect(picture_path):
     # Show the final image with the matched area.
     cv2.imshow('Detected', img)
 
-    return result1, result2, result3, result4
+    return final_result_array
 
 def process_picture(picture_path):
 
@@ -393,7 +394,7 @@ def process_picture(picture_path):
 
     crown_loc = crowndetect(picture_path)
 
-    print(crown_loc)
+    #print(crown_loc)
 
     #print(crown_loc.shape)
 
@@ -421,7 +422,7 @@ def process_picture(picture_path):
 
     id_matrix = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
 
-    print(id_matrix)
+    #print(id_matrix)
 
     map_simplified = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
 
@@ -513,26 +514,32 @@ def process_picture(picture_path):
 
        
 
-    """ 
-    cv2.imshow("Blue", img_outB)
+    
+    """ cv2.imshow("Blue", img_outB)
     cv2.imshow("Green", img_outG)
-    cv2.imshow("Gray Inverted", img_gray_inverted)
-    cv2.imshow("Gray I % Red ", img_graysubR)
-    cv2.imshow("Gray I % Red % Blue ", img_graysubRsubB)
-    cv2.imshow("Gray I % Red % Blue % Green ", img_graysubRsubBsubG) """
 
-    """ cv2.imshow("Red", img_outR)
-    cv2.imshow("Green % Blue", img_GsubB)
-    cv2.imshow("Green % Red", img_GsubR) """
-    cv2.imshow("Green % Blue % Red", img_GsubBsubR)
-    """ cv2.imshow("Red % Green % Blue", img_RsubGsubB) """
+    cv2.imshow("Red", img_outR)
+    cv2.imshow("Green % Blue", img_GsubB) """
+    cv2.imshow("Green % Red", img_GsubR)
+    """ cv2.imshow("Green % Blue % Red", img_GsubBsubR)
+    cv2.imshow("Red % Green % Blue", img_RsubGsubB) """
 
     cv2.imshow("Forest?", img_Forest)
-    cv2.imshow("Meadow?", img_Meadows)
+    """ cv2.imshow("Meadow?", img_Meadows)
     cv2.imshow("Waste?", img_Waste)
     cv2.imshow("Field?", img_Field)
     cv2.imshow("Ocean", img_Ocean)
-    cv2.imshow("Mines", img_Mines)
+    cv2.imshow("Mines", img_Mines) """
+
+    cv2.imshow("Mean1", img_mean)
+    """ cv2.imshow("Mean2", img_mean_BR)
+    cv2.imshow("Mean3", img_mean_G)
+    cv2.imshow("Mean4", img_mean_GBR)
+    cv2.imshow("Mean5", img_mean_RG)
+    cv2.imshow("Mean6", img_mean_RGB) """
+
+
+
 
     cv2.imshow("Map Simplified", map_simplified)
 
@@ -559,6 +566,50 @@ def process_picture(picture_path):
     id11_count = 0
     id12_count = 0
     id13_count = 0
+
+    id1_crown_count = 0
+    id2_crown_count = 0
+    id3_crown_count = 0
+    id4_crown_count = 0
+    id5_crown_count = 0
+    id6_crown_count = 0
+    id7_crown_count = 0
+    id8_crown_count = 0
+    id9_crown_count = 0
+    id10_crown_count = 0
+    id11_crown_count = 0
+    id12_crown_count = 0
+    id13_crown_count = 0
+
+    for item in crown_loc:
+        #print(item[0], item[1])
+        if id_matrix[item[0], item[1], 0] == 1:
+            id1_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 2:
+            id2_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 3:
+            id3_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 4:
+            id4_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 5:
+            id5_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 6:
+            id6_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 7:
+            id7_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 8:
+            id8_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 9:
+            id9_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 10:
+            id10_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 11:
+            id11_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 12:
+            id12_crown_count += 1
+        if id_matrix[item[0], item[1], 0] == 13:
+            id13_crown_count += 1
+
 
     for y in range(id_matrix.shape[0]):
         for x in range(id_matrix.shape[1]):
@@ -603,7 +654,7 @@ def process_picture(picture_path):
     id12_count_tiles = id12_count/10000
     id13_count_tiles = id13_count/10000
 
-    print(id1_count_tiles)
+    """ print(id1_count_tiles)
     print(id2_count_tiles)
     print(id3_count_tiles)
     print(id4_count_tiles)
@@ -615,11 +666,33 @@ def process_picture(picture_path):
     print(id10_count_tiles)
     print(id11_count_tiles)
     print(id12_count_tiles)
-    print(id13_count_tiles)
+    print(id13_count_tiles) """
+
+    """ print(id1_crown_count)
+    print(id2_crown_count)
+    print(id3_crown_count)
+    print(id4_crown_count)
+    print(id5_crown_count)
+    print(id6_crown_count)
+    print(id7_crown_count)
+    print(id8_crown_count)
+    print(id9_crown_count)
+    print(id10_crown_count)
+    print(id11_crown_count)
+    print(id12_crown_count)
+    print(id13_crown_count) """
+
+    total_crown_count = id1_crown_count + id2_crown_count + id3_crown_count + id4_crown_count + id5_crown_count + id6_crown_count + id7_crown_count + id8_crown_count + id9_crown_count + id10_crown_count + id11_crown_count + id12_crown_count + id13_crown_count
+
+    points = (id1_crown_count * id1_count_tiles) + (id2_crown_count * id2_count_tiles) + (id3_crown_count * id3_count_tiles) + (id4_crown_count * id4_count_tiles) + (id5_crown_count * id5_count_tiles) + (id6_crown_count * id6_count_tiles) + (id7_crown_count * id7_count_tiles) + (id8_crown_count * id8_count_tiles) + (id9_crown_count * id9_count_tiles) + (id10_crown_count * id10_count_tiles) + (id11_crown_count * id11_count_tiles) + (id12_crown_count * id12_count_tiles) + (id13_crown_count * id13_count_tiles)
+
+    print(f"Pic: {picture_path}")
+    print(f"Crown count: {total_crown_count}")
+    print(f"Points count: {points}")
 
     PutHSV(img_small_big)
     cv2.imshow("Forest", img_small_big)
-    PutHSV(img_small_big_GBR)
+    """ PutHSV(img_small_big_GBR)
     cv2.imshow("Meadows", img_small_big_GBR)
     PutHSV(img_small_big_RG)
     cv2.imshow("Waste val", img_small_big_RG)
@@ -628,7 +701,7 @@ def process_picture(picture_path):
     PutHSV(img_small_big_RGB)
     cv2.imshow("Field val", img_small_big_RGB)
     PutHSV(img_small_big_BR)
-    cv2.imshow("Ocean val", img_small_big_BR)
+    cv2.imshow("Ocean val", img_small_big_BR) """
     #PutHSV(img_old_mean)
     #cv2.imshow("Old Mean", img_old_mean)
 
@@ -655,21 +728,20 @@ def process_picture(picture_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+    #Denne funktion er lånt fra nettet :)
+
 """ for picture_file in picture_files:
     picture_path = os.path.join(picture_folder, picture_file)
 
-    # Process the current picture
     process_picture(picture_path)
-
-    # Wait for a key press to move to the next picture
+   
     key = cv2.waitKey(0)
 
-    # If the key pressed is 'q', break the loop and close the window
     if key == ord('q'):
-        break
+        break """
 
 # Close any open windows
-cv2.destroyAllWindows() """
+cv2.destroyAllWindows()
 
-process_picture("Pierres Mappe/Kingdomino/Billeder/7.jpg")
+process_picture("Pierres Mappe/Kingdomino/Billeder/15.jpg")
 
