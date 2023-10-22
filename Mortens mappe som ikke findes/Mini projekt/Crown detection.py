@@ -38,7 +38,6 @@ def Split(A, B, G, R):
 Split(img, img_outB, img_outG, img_outR)
 
 #the diferent color chanels are subtracted from one another in order to end up ith only the white colors form the original image
-img_out2 = cv2.subtract(img_outG, img_outB)
 
 img_out3 = cv2.subtract(img_outR, img_outB)
 
