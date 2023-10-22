@@ -1,95 +1,95 @@
-import cv2
+import cv2 as cv
 import numpy as np
+import math
+import os
 
 # Load the image
-image = cv2.imread("C:/Users/minik/Desktop/VSCode/55.jpg")
+image = cv.imread("Vores_MiniProjekt/King Domino dataset/King Domino dataset/Cropped and perspective corrected boards/19.jpg")
+cv.imshow("board", image)   
 
-#define the template
-template = cv2.imread("C:/Users/minik/Desktop/VSCode/ThreshCrown.png", cv2.IMREAD_COLOR)
+# Split the image into RGB channels
+B, G, R = cv.split(image)
+
+# Subtract the red channel from the green channel
+GRSub = cv.subtract(G, R)
+#cv.imshow("GRSub", GRSub)
+
+# Subtract the green channel from the blue channel
+BGSub = cv.subtract(B, G)
+
+# Subtract the blue channel from the red channel
+RBSub = cv.subtract(R, B)
+
+# Subtract GRSub from the blue channel
+BSub = cv.subtract(B, GRSub)
+#cv.imshow("BSub", BSub)
+
+# Subtracting BGSub from BSub
+BGBSub = cv.subtract(BSub, BGSub)
+#cv.imshow("BGBub", BGBSub)
+
+# Subtracting RBSub from GBGSub
+FinalImage = cv.subtract(BGBSub, RBSub)
+#cv.imshow("FinalImage", FinalImage)
 
 # Convert the image to the grayscale color space
-grayTemp = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+gray_img = cv.merge((FinalImage, FinalImage, FinalImage))
 
-w, h = grayTemp.shape[::-1]
+cv.imshow("gray_img", gray_img)
 
-template90 = cv2.rotate(grayTemp, cv2.ROTATE_90_CLOCKWISE)
+# Template
+template = cv.imread("C:/Users/minik/Desktop/VSCode/Crown_bw.png", cv.IMREAD_COLOR)
 
-template180 = cv2.rotate(grayTemp, cv2.ROTATE_180)
+gray_img2 = cv.GaussianBlur(gray_img, (7, 7), 0)
+#v.imshow("template", gray_img2)
 
-template270 = cv2.rotate(grayTemp, cv2.ROTATE_90_COUNTERCLOCKWISE) 
+# Create an array with the templates rotated 90, 180 and 270 degrees
+Templates = [template, cv.rotate(template, cv.ROTATE_90_CLOCKWISE), cv.rotate(template, cv.ROTATE_180), cv.rotate(template, cv.ROTATE_90_COUNTERCLOCKWISE)]
 
-# Convert the image to the HSV color space
-hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+template = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
+#Templates = [template, templateL, templateD, templateR]
 
-# Define the lower and upper bounds for the yellow color range in HSV
-#lower_yellow = np.array([20, 100, 100])  # Adjust these values as needed
-#upper_yellow = np.array([30, 255, 255])  # Adjust these values as needed
+#Templates2 = [template2, cv.rotate(template2, cv.ROTATE_90_CLOCKWISE), cv.rotate(template2, cv.ROTATE_180), cv.rotate(template2, cv.ROTATE_90_COUNTERCLOCKWISE)]
 
-#define the lower and upper bounds for the white color range in HSV
+# Store width and height of image and template in w and h
+w, h, channels = image.shape
 
-sensitivity = 130
-lower_white = np.array([0, 0, 255-sensitivity])
-upper_white = np.array([255, sensitivity, 255])
+print(image.shape)
 
-# Create a binary mask for the yellow color range
-#yellow_mask = cv2.inRange(hsv_image, lower_yellow, upper_yellow)
+tw, th = template.shape
 
-# Apply the mask to the original image to get the binary result
-#yellow_binary_image = cv2.bitwise_and(image, image, mask=yellow_mask)
+MatchCount = []
 
-# Create a binary mask for the white color range
-white_mask = cv2.inRange(hsv_image, lower_white, upper_white)
+distance_threshold = 10
 
-# Apply the mask to the original image to get the binary result
-white_binary_image = cv2.bitwise_and(image, image, mask=white_mask)
+crowns = np.zeros((5,5), dtype=int)
 
-white_gray = cv2.cvtColor(white_binary_image, cv2.COLOR_BGR2GRAY)
+for k in range(len(Templates)):
+    res = cv.matchTemplate(gray_img, Templates[k], cv.TM_CCOEFF_NORMED)
+    loc = np.where(res >= 0.57) #0.56 
+    
+    UniquePoints = []
+    MatchPoints = list(zip(*loc[::-1]))
+    # print(MatchList)
+    
+    for match in MatchPoints:
+        unique = True
+        for entries in UniquePoints:
+            if math.sqrt((match[0] - entries[0])**2 + (match[1] - entries[1])**2) < distance_threshold:
+                unique = False
+                break
+        if unique:
+            UniquePoints.append(match)
+            MatchCount.append(match)
+            # print(UniquePoints)
+    
+    for pt in UniquePoints:
+        cv.rectangle(image, pt, (pt[0] + tw, pt[1] + th), (0, 255, 255), 2)
+        x, y = pt
+        row = y // (w // 5)
+        column = x // (h // 5)
+        crowns[row, column] += 1
 
-contours, hierarchy = cv2.findContours(white_gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-isolated_image = np.zeros_like(image)
-
-edged = cv2.Canny(white_gray, 30, 200)
-
-cv2.drawContours(isolated_image, contours, -1, (255, 255, 255), 2)
-
-isolated_image = cv2.cvtColor(isolated_image, cv2.COLOR_BGR2GRAY)
-
-res1 = cv2.matchTemplate(white_gray, grayTemp, cv2.TM_CCOEFF_NORMED)
-res2 = cv2.matchTemplate(white_gray, template90, cv2.TM_CCOEFF_NORMED)
-res3 = cv2.matchTemplate(white_gray, template180, cv2.TM_CCOEFF_NORMED)
-res4 = cv2.matchTemplate(white_gray, template270, cv2.TM_CCOEFF_NORMED)
-
-threshold = 0.8
-
-loc = np.where(res1 >= threshold)
-loc2 = np.where(res2 >= threshold)
-loc3 = np.where(res3 >= threshold)
-loc4 = np.where(res4 >= threshold)
-
-
-for pt in zip(*loc[::-1]):
-	cv2.rectangle(white_gray, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
-
-for pt in zip(*loc2[::-1]):
-	cv2.rectangle(white_gray, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
-
-for pt in zip(*loc3[::-1]):
-	cv2.rectangle(white_gray, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
-
-for pt in zip(*loc4[::-1]):
-	cv2.rectangle(white_gray, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
-	
-# Show the binary image
-#cv2.imshow("Yellow Binary Image", yellow_binary_image)
-cv2.imshow("White Binary Image", white_binary_image)
-cv2.imshow("White Gray Image", white_gray)
-cv2.imshow("Isolated Image", isolated_image)
-cv2.imshow("res1", res1)
-cv2.imshow("res2", res2)
-cv2.imshow("res3", res3)
-cv2.imshow("res4", res4)
-cv2.imshow("edged", edged)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+print(crowns)
+cv.imshow("Detected", image)
+cv.waitKey(0)
