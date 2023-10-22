@@ -137,7 +137,7 @@ loc4 = np.where(res >= threshold)
 # for template 1
 # Draw a rectangle around the matched region.
 for pt in zip(*loc1[::-1]):
-	cv2.rectangle(img_rgb, pt, (pt[0] + w1, pt[1] + h1), (255, 50, 255), 2)
+	cv2.rectangle(img, pt, (pt[0] + w1, pt[1] + h1), (255, 50, 255), 2)
 
 
 
@@ -145,7 +145,7 @@ for pt in zip(*loc1[::-1]):
 # for template 2
 # Draw a rectangle around the matched region.
 for pt in zip(*loc2[::-1]):
-	cv2.rectangle(img_rgb, pt, (pt[0] + w2, pt[1] + h2), (255, 50, 255), 2)
+	cv2.rectangle(img, pt, (pt[0] + w2, pt[1] + h2), (255, 50, 255), 2)
 
 
 
@@ -153,18 +153,23 @@ for pt in zip(*loc2[::-1]):
 # for template 3
 # Draw a rectangle around the matched region.
 for pt in zip(*loc3[::-1]):
-	cv2.rectangle(img_rgb, pt, (pt[0] + w3, pt[1] + h3), (255, 50, 255), 2)
+	cv2.rectangle(img, pt, (pt[0] + w3, pt[1] + h3), (255, 50, 255), 2)
 
 
 
 # for template 4
 # Draw a rectangle around the matched region.
 for pt in zip(*loc4[::-1]):
-	cv2.rectangle(img_rgb, pt, (pt[0] + w4, pt[1] + h4), (255, 50, 255), 2)
+	cv2.rectangle(img, pt, (pt[0] + w4, pt[1] + h4), (255, 50, 255), 2)
 cv2.rectangle
 
 
 
 # Show the final image with the matched area.
-cv2.imshow('Detected', img_rgb)
+cv2.imshow('Detected', img)
+#cv2.imshow('Detected', loc1)
+#cv2.imshow('Detected', loc2)
+#cv2.imshow('Detected', loc3)
+#cv2.imshow('Detected', loc4)
+
 cv2.waitKey(0)
