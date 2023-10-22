@@ -254,11 +254,11 @@ def crownCounter(crown,y,x):
                 pass 
 
 
-def Viewer(input, input2, input3, input4):
+def Viewer(input, input2, input3):
     cv.imshow("Test1", input)
     cv.imshow("Test2", input2)
     cv.imshow("Test3", input3)
-    cv.imshow("Test4", input4)
+    #cv.imshow("Test4", input4)
     cv.waitKey(0)
 
 
@@ -275,7 +275,7 @@ def SubtractImg (image):
     return CrownImage
 
 #Vars som kan ændres fra run til run
-image_Count = 79
+image_Count = 75
 image_Size = 500
 sub_Image_Size = 25
 resolution_In_Drawn_Squares = int((500**2)/(sub_Image_Size**2))
@@ -298,10 +298,6 @@ TileArray = np.zeros((size2, size2, color_Level+1), dtype='uint8')
 color_List = [[42, 193, 148],[26, 233, 189],[42, 176, 68],[104, 206, 129],[23, 124, 111],[22, 130,  51]]
           
 
-Nid = 50
-blobs = []
-list_N = []
-sumP = 0  
 
 
 
@@ -309,6 +305,11 @@ sumP = 0
 Dictionary_generator(image_Count, path, library_Of_Images)
 
 for i in range(1, image_Count+1):
+    print("Billede: ", i)
+    Nid = 50
+    blobs = []
+    list_N = []
+    sumP = 0  
     sub_Image_Matrix = Gem_Alle_Billeder(library_Of_Images[f'image{i}'], size, sub_Image_Size)
     color_Array = Liste_Med_Underbilleders_Farver_Special(sub_Image_Matrix, size)
     print(color_Array.shape)
@@ -378,7 +379,7 @@ for i in range(1, image_Count+1):
     print("Krone array", Crowns)
     print("den samlet værdi er", sumP)
 
-    Viewer(template3, library_Of_Images[f'image{i}'], )
+    Viewer(template2, template, library_Of_Images[f'image{i}'], )
 
 
 
