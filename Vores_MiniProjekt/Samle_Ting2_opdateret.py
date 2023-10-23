@@ -1,32 +1,9 @@
 import cv2 as cv
 import numpy as np
 import math
+import os
 
-#Funktionerne kan evt. bruges til at print et billede med en bestem farve enten opgivet i RGB/BGR eller HSV
-def lav_en_pixels_billede_BGR(input, Shape):
-    bgr_color = (input)  # Hue, Saturation, Value
-    template2 = np.zeros_like(Shape)
-    template2[:] = bgr_color
-    cv.imshow('Pixel_BGR', template2)
-def lav_en_pixels_billede_HSV(input):
-    hsv_color = (input)  # Hue, Saturation, Value
-
-    # Create a 3-channel blank HSV image filled with the desired color
-    hsv_image = np.zeros((1, 1, 3), dtype=np.uint8)
-    hsv_image[0, 0, 0] = hsv_color[0]  # Set Hue
-    hsv_image[0, 0, 1] = hsv_color[1]  # Set Saturation
-    hsv_image[0, 0, 2] = hsv_color[2]  # Set Value
-
-    # Convert the HSV image to BGR
-    bgr_color = cv.cvtColor(hsv_image, cv.COLOR_HSV2BGR)[0, 0]
-
-    temp = np.zeros((500,500,3), dtype='uint8')
-    temp[:] = bgr_color
-    cv.imshow('Pixel_HSV', temp)
 path = 'Vores_MiniProjekt\King Domino dataset\King Domino dataset\Cropped and perspective corrected boards\\'
-
-
-
 
 #Denne funktion laver et library med alle billederne. Deres navn bliver 'image1' til whatever billede man siger den skal læse.
 #Den skal køres først og minimums værdien for læste billeder er 1. billederne bliver gemt i deres normale matrixform, side om side med andre billeder i listen. 
@@ -36,18 +13,24 @@ def Dictionary_generator(Amount, path, dictionary):
         image_Temp = cv.imread(File_Name)
         dictionary[f'image{i}'] = image_Temp
 
-
-
 #Denne funktion køres først og returnere et udklip at den originale billede
 def gembillede(input, x, y, Resolution):
     outputimg = input[x*Resolution:(x+1)*Resolution, y*Resolution:(y+1)*Resolution]
     return outputimg
 
 #Denne funktion gemmer underbilleder i en matrix
-def Gem_Alle_Billeder(input, iterations, Output_Matrix, Resolution):
+#Input er det originale billeder der bliver procceceret
+# Iterations er udregnet på baggrund af resolution of er det tal man får ved 500/resolution for at se hvor mange sub image man får på hvert led
+#Resolution er størrelsen på underbilledet 
+#Output matrixen er så en matrix med størrelsen (iteration, iteration, Resolution, Resolution, 3)
+#nærmere beskrevet iteration gange iteration billeder med resolution gange resolution pixels som alle har 3 farveværdier i BGR
+def Gem_Alle_Billeder(input, iterations, Resolution):
+    Output_Matrix = np.zeros((iterations, iterations, Resolution, Resolution, 3))
     for i in range(iterations):
         for j in range(iterations):
             Output_Matrix[i][j] = gembillede(input, i, j, Resolution)
+    return Output_Matrix
+    
 
 
 
@@ -58,46 +41,40 @@ def Gem_Alle_Billeder(input, iterations, Output_Matrix, Resolution):
 def prominent(image_input):
         data = np.reshape(image_input, (-1,3))
         data = np.float32(data)
-
         criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)
         flags = cv.KMEANS_PP_CENTERS
         compactness,labels,centers = cv.kmeans(data,1,None,criteria,10,flags)
         return centers[0].astype('uint8')
 
 
-def Liste_Med_Underbilleders_Farver(input_sub_image_Matrix, ite, output_matrix1, output_matrix2):
+#Denne funktion tager matricen med underbillederne og finder den gennemsnitsfarven af billedet og giver det så som output i HSV og BGR
+def Liste_Med_Underbilleders_Farver(input_sub_image_Matrix, ite):
+    output_matrix_BGR = np.zeros((20, 20, 3))
+    output_matrix_HSV = np.zeros((5, 5, 3))
     for i in range(ite):
         for j in range(ite):
-            output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j])
-            output_matrix2[i][j] = cv.cvtColor(np.uint8([[output_matrix1[i][j]]]), cv.COLOR_BGR2HSV)[0][0]
-            #output_matrix2[i][j] = pixel_hsv = cv.cvtColor(np.uint8([[pixel_bgr_Array]]), cv.COLOR_BGR2HSV)[0][0]
-                
+            output_matrix_BGR[i][j] = prominent(input_sub_image_Matrix[i][j])
+            output_matrix_HSV[i][j] = cv.cvtColor(np.uint8([[output_matrix_BGR[i][j]]]), cv.COLOR_BGR2HSV)[0][0]
+    return output_matrix_BGR, output_matrix_HSV
 
 
-def Liste_Med_Underbilleders_Farver_Special(input_sub_image_Matrix, ite, output_matrix1):
+#Her bestemmer
+def Liste_Med_Underbilleders_Farver_Special(input_sub_image_Matrix, ite):
+    output_matrix = np.zeros((ite,ite,3))
     for i in range(ite):
         for j in range(ite):
             if i%4 == False or (i+1)%4 == False:
-                output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j])
+                output_matrix[i][j] = prominent(input_sub_image_Matrix[i][j])
             else:
                 if j%4 == False or (j+1)%4 == False:#1,3,4,7,8
-                    output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j]) 
+                    output_matrix[i][j] = prominent(input_sub_image_Matrix[i][j]) 
                 elif (j-1)%4 == False:#1,5,9
-                    output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j-1])
+                    output_matrix[i][j] = prominent(input_sub_image_Matrix[i][j-1])
                 elif (j+2)%4 == False:#2,6,10
-                    output_matrix1[i][j] = prominent(input_sub_image_Matrix[i][j+1])
-                #else: output_matrix1[i][j] = [0,0,0]
-
-
-
-def ColorA_To_ColorA2(input):
-
-    A = np.sum([input[0][0],input[0][1],input[0][2],input[0][3],input[1][0],input[1][1],input[1][2],input[1][3],input[2][0],input[2][1],input[2][2],input[2][3],input[3][0],input[3][1],input[3][2],input[3][3]], axis=0)
-    A = A/16
-    A = A.astype(int)  
-
-    return input
-
+                    output_matrix[i][j] = prominent(input_sub_image_Matrix[i][j+1])
+                #debugging
+                #else: output_matrix[i][j] = [0,0,0]
+    return output_matrix
 
 
 
@@ -117,22 +94,6 @@ def Tegn_Firkanter(ite, temp, resolution, color_Matrix):
             x_1 = int(x_1 + resolution)
             x_2 = int(x_2 + resolution)
 
-
-def Tegn_Firkanter_Special(ite, temp, resolution, color_Matrix):
-    y_1 = int(-resolution)
-    y_2 = 0
-    for i in range(ite):
-        x_1 = 0
-        x_2 = int(resolution)
-        y_1 = int(y_1 + resolution)
-        y_2 = int(y_2 + resolution)
-        for j in range(ite):
-            b = int(color_Matrix[i][j][0])
-            g = int(color_Matrix[i][j][1])
-            r = int(color_Matrix[i][j][2])
-            temp = cv.rectangle(temp, (x_1, y_1), (x_2, y_2), (b, g, r), -1)
-            x_1 = int(x_1 + resolution)
-            x_2 = int(x_2 + resolution)
 
 
 def Tegn_Firkanter_Special2(ite, temp, resolution, color_Matrix, farver):
@@ -175,38 +136,12 @@ def Tegn_Firkanter_Special2(ite, temp, resolution, color_Matrix, farver):
 
 
 
-
-
-#Gul - Mark (7,155,171)   - [ 93 245 171]
-#grøn - eng (21,162,111)   - [ 79 222 162]
-#mørkegrøn - skov  (37,52,38)   - [62 74 52]
-#blå - vand  (192,99,14)   - [ 14 236 192]
-#brun - vissen  (43,95,108)   - [ 96 153 108]
-#sort - mine (0, 0, 0)    - [ 96 153 108]
-#Anden brun Bordplade (19, 92, 124)   - [ 99 216 124]
-Eng    = np.array([[42, 193, 148],[44, 205, 152],[41, 210, 141],[40, 197, 149],[40, 220, 138],[42, 214, 149],[37, 183, 128],[40, 219, 134],[40, 189, 119]])
-Mark   = np.array([[26, 233, 189],[26, 233, 193],[26, 243, 193],[26, 233, 189],[26, 241, 186],[26, 236, 174],[27, 216, 168],[27, 243, 185],[26, 240, 186]])
-Skov   = np.array([[42, 176, 68],[40, 166, 63],[40, 175, 64],[42, 166, 63],[40, 174, 63],[38, 162, 63],[40, 111, 71],[36, 181, 62],[34, 153, 70]])
-Vand   = np.array([[104, 206, 129],[105, 233, 138],[106, 219, 129],[107, 236, 137],[106, 240, 153],[106, 236, 144],[105, 242, 160],[104, 233, 161],[105, 191, 140]])
-Vissen = np.array([[23, 124, 111],[23, 130, 114],[23, 160, 113],[26, 250, 165],[23, 130,  94],[21, 156,  93],[22, 131, 121],[23, 158, 121],[25, 118, 115]])
-Mine   = np.array([[22, 130,  51],[23, 125,  51],[23, 118,  56],[24, 134,  63],[20, 115,  40],[24, 118,  52],[23, 190,  55],[23, 157,  39],[22, 147,  40]])
-
-np.reshape(Eng,    (9,3))
-np.reshape(Mark,   (9,3))
-np.reshape(Skov,   (9,3))
-np.reshape(Vand,   (9,3))
-np.reshape(Vissen, (9,3))
-np.reshape(Mine,   (9,3))
-
-Eng_Tresh    = np.array([[np.min(Eng, axis=0)],    [np.max(Eng, axis=0)]])
-Mark_Tresh   = np.array([[np.min(Mark, axis=0)],   [np.max(Mark, axis=0)]])
-Skov_Tresh   = np.array([[np.min(Skov, axis=0)],   [np.max(Skov, axis=0)]])
-Vand_Tresh   = np.array([[np.min(Vand, axis=0)],   [np.max(Vand, axis=0)]])
-Vissen_Tresh = np.array([[np.min(Vissen, axis=0)], [np.max(Vissen, axis=0)]])
-Mine_Tresh   = np.array([[np.min(Mine, axis=0)],   [np.max(Mine, axis=0)]])
-
-
-
+Eng_Tresh    = np.zeros((1,2,3))
+Mark_Tresh   = np.zeros((1,2,3))
+Skov_Tresh   = np.zeros((1,2,3))
+Vand_Tresh   = np.zeros((1,2,3))
+Vissen_Tresh = np.zeros((1,2,3))
+Mine_Tresh   = np.zeros((1,2,3))
 
 Eng_Tresh    = np.array([[[32, 160, 85]],    [[50, 255, 163]]])
 Mark_Tresh   = np.array([[[23, 210, 130]],    [[33, 254, 204]]])
@@ -215,24 +150,6 @@ Vand_Tresh   = np.array([[[31, 105, 56]],    [[108, 255, 194]]])
 Vissen_Tresh = np.array([[[18, 56, 67]],    [[32, 255, 176]]])
 Mine_Tresh   = np.array([[[17, 48, 33]],    [[31, 196, 74]]])
 
-
-
-#print("Eng", Eng_Tresh)
-#print("Mark", Mark_Tresh)
-#print("Skov", Skov_Tresh)
-#print("Vand", Vand_Tresh)
-#print("Vissen", Vissen_Tresh)
-#print("Mine", Mine_Tresh)
-
-
-
-EH, EH1, ES, ES1, EV, EV1 = 2, 5, 5, 5, 5, 10
-MH, MH1, MS, MS1, MV, MV1 = 10, 10, 15, 10, 20, 10
-SH, SH1, SS, SS1, SV, SV1 = 5, 10, 20, 25, 30, 40
-VH, VH1, VS, VS1, VV, VV1 = 5, 5, 5, 15, 30, 20
-VIH, VIH1, VIS, VIS1, VIV, VIV1 = 1, 0, 25, 0, 18, 0
-MIH, MIH1, MIS, MIS1, MIV, MIV1 = 3, 2, 5, 5, 3, 5
-
 EH, EH1, ES, ES1, EV, EV1 = 0,0,0,0,0,0
 MH, MH1, MS, MS1, MV, MV1 = 0,0,0,0,0,0
 SH, SH1, SS, SS1, SV, SV1 = 0,0,0,0,0,0
@@ -240,13 +157,8 @@ VH, VH1, VS, VS1, VV, VV1 = 0,0,0,0,0,0
 VIH, VIH1, VIS, VIS1, VIV, VIV1 = 0,0,0,0,0,0
 MIH, MIH1, MIS, MIS1, MIV, MIV1 = 0,0,0,0,0,0
 
-
-#print("min", Mine_Tresh[0][0][0]-EH, Mine_Tresh[0][0][1]-ES, Mine_Tresh[0][0][2]-EV )
-#print("max", Mine_Tresh[1][0][0]+EH1, Mine_Tresh[1][0][1]+ES1, Mine_Tresh[1][0][2]+EV1)
-
-
-def Type_Finder(input, output):
-    
+def Type_Finder(input):
+    output = np.zeros((5, 5, 4))
     for i in range(5):
         for j in range(5):
             output[i][j][0] = input[i][j][0]
@@ -284,6 +196,62 @@ def Type_Finder(input, output):
 
             else:
                 output[i][j][3] = 0
+    return output
+
+
+def Tile_Assert(input):
+    output = np.zeros((5,5))
+    for i in range(5):
+        for j in range(5):
+            output[i][j] = input[i][j][3]
+    
+    return output
+
+
+#Gruppering og optælling af kroner
+def grassfire(img,coord,id):
+    y,x = coord
+    burn_queue = []  
+    group = []
+    
+    if (y,x) in list_N:
+        return id
+    else:
+        type = img[y,x]
+        burn_queue.append((y,x))
+        
+    while len(burn_queue) > 0:
+        current = burn_queue.pop()
+        y,x = current
+        if current not in group:
+            group.append((y,x))
+            list_N.append((y,x))
+            img[y,x] = id
+            if x+1 < img.shape[1] and img[y,x+1] == type:
+                burn_queue.append((y,x+1))
+            if x > 0 and img[y,x-1] == type:
+                burn_queue.append((y,x-1))
+            if y+1 < img.shape[0] and img[y+1,x] == type:
+                burn_queue.append((y+1,x))
+            if y > 0 and img[y-1,x] == type:
+                burn_queue.append((y-1,x))
+        
+        if len(burn_queue) ==0:
+            blobs.append(group)
+            return id+1
+    return id
+
+
+def crownCounter(crown,y,x):
+    krone = crown[y,x]
+    for z in range(len(blobs)):
+        for w in range(len(blobs[z])):
+            try:
+                if blobs[z][w][0] == y and blobs[z][w][1] == x:
+                    blobs[z][w] = krone
+                    return
+            except Exception:
+                pass 
 
 
 def Viewer(input, input2, input3, input4):
@@ -291,11 +259,24 @@ def Viewer(input, input2, input3, input4):
     cv.imshow("Test2", input2)
     cv.imshow("Test3", input3)
     cv.imshow("Test4", input4)
-    cv.waitKey()
+    cv.waitKey(0)
+
+
+#Denne funktion processere billedet så der kan lave template matching på det
+def SubtractImg (image):
+    B, G, R = cv.split(image)
+    GRSub = cv.subtract(G, R)
+    BGSub = cv.subtract(B, G)
+    RBSub = cv.subtract(R, B)
+    BSub = cv.subtract(B, GRSub)
+    BGBSub = cv.subtract(BSub, BGSub)
+    CrownImage = cv.subtract(BGBSub, RBSub)
+    CrownImage = cv.merge((CrownImage, CrownImage, CrownImage))
+    return CrownImage
 
 
 #Vars som kan ændres fra run til run
-image_Count = 74
+image_Count = 79
 image_Size = 500
 sub_Image_Size = 25
 resolution_In_Drawn_Squares = int((500**2)/(sub_Image_Size**2))
@@ -316,32 +297,105 @@ color_Array2 = np.zeros((size2, size2, color_Level), dtype='uint8')
 sub_Image_Matrix2 = np.zeros((size2, size2, sub_Image_Size2, sub_Image_Size2, color_Level), dtype='uint8')
 TileArray = np.zeros((size2, size2, color_Level+1), dtype='uint8')
 color_List = [[42, 193, 148],[26, 233, 189],[42, 176, 68],[104, 206, 129],[23, 124, 111],[22, 130,  51]]
+          
+
+Nid = 50
+blobs = []
+list_N = []
+sumP = 0  
 
 
+#Kode der skal køres
 Dictionary_generator(image_Count, path, library_Of_Images)
+
 for i in range(1, image_Count+1):
-    Gem_Alle_Billeder(library_Of_Images[f'image{i}'], size, sub_Image_Matrix, sub_Image_Size)
-    Liste_Med_Underbilleders_Farver_Special(sub_Image_Matrix, size, color_Array)
-    #color_Array2 = ColorA_To_ColorA2(color_Array)    
-    #print(sub_Image_Matrix.shape)   
-
+    print("billede:", i)
+    sub_Image_Matrix = Gem_Alle_Billeder(library_Of_Images[f'image{i}'], size, sub_Image_Size)
+    color_Array = Liste_Med_Underbilleders_Farver_Special(sub_Image_Matrix, size)
+    print(color_Array.shape)
     Tegn_Firkanter(size, template, sub_Image_Size, color_Array)
-    Tegn_Firkanter_Special(size, template2, sub_Image_Size2, color_Array)
 
-    Gem_Alle_Billeder(template, size2, sub_Image_Matrix2, sub_Image_Size2)
-    Liste_Med_Underbilleders_Farver(sub_Image_Matrix2, size2, color_Array, color_Array2)
-    Tegn_Firkanter_Special(size, template2, sub_Image_Size2, color_Array)
-    #print(color_Array[0][0], color_Array2[0][0])
-    Type_Finder(color_Array2, TileArray)
-    print(TileArray)
-    #print(Mine_Tresh[0])
-    #print(Mine_Tresh[1])
+    sub_Image_Matrix2 = Gem_Alle_Billeder(template, size2, sub_Image_Size2)
+    color_Array, color_Array2 = Liste_Med_Underbilleders_Farver(sub_Image_Matrix2, size2)
+    Tegn_Firkanter(size, template2, sub_Image_Size2, color_Array)
+
+
+    TileArray = Type_Finder(color_Array2)
     Tegn_Firkanter_Special2(size, template3, sub_Image_Size2, TileArray, color_List)
 
-    #lav_en_pixels_billede_HSV((42, 193, 148))
-    Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
+    TileArray_Kun_Type = Tile_Assert(TileArray)
+    TileArray_Kun_Type = TileArray_Kun_Type.astype(int)
+    #Viewer(template, template2, template3, library_Of_Images[f'image{i}'])
 
-#Viewer(template2)
+
+    #Crown detection
+    CrownImage = SubtractImg(library_Of_Images[f'image{i}'])
+    Crowns = np.zeros((5,5), dtype=int)
+
+
+    #defining the template
+    CrownTemplate = cv.imread("Vores_MiniProjekt/Crown_bw.png", cv.IMREAD_COLOR)
+    Templates = [CrownTemplate, cv.rotate(CrownTemplate, cv.ROTATE_90_CLOCKWISE), cv.rotate(CrownTemplate, cv.ROTATE_180), cv.rotate(CrownTemplate, cv.ROTATE_90_COUNTERCLOCKWISE)]
+    th, tw, channels = CrownTemplate.shape
+
+
+    #perform match operations000
+    for k in range(len(Templates)):
+        res = cv.matchTemplate(CrownImage, Templates[k], cv.TM_CCOEFF_NORMED)
+        loc = np.where(res >= 0.57)
+        loc2 = np.zeros((0))
+        
+        UniquePoints = []
+        MatchPoints = list(zip(*loc[::-1]))
+        #MatchPoints = list(zip(loc[:,:,-1], loc[:,:,-1]))
+        for match in MatchPoints:
+            Unique = True
+            for entries in UniquePoints:
+                if math.sqrt((match[0] - entries[0])**2 + (match[1] - entries[1])**2) < 10:
+                    Unique = False
+                    break
+            if Unique:
+                UniquePoints.append(match)
+        for pt in UniquePoints:
+            cv.rectangle(library_Of_Images[f'image{i}'], pt, (pt[0]+th, pt[1]+tw), (0,0,255), 2)
+            x, y = pt
+            CrownRow = y // (image_Size // 5)
+            CrownColumn = x // (image_Size // 5)
+            Crowns[CrownRow, CrownColumn] += 1
+
+
+    #Gruppering og optælling af kroner
+    blobs = []
+    list_N = []
+    sumP = 0
+    print("array med types:")
+    print(TileArray_Kun_Type)
+    for y in range(5):
+        for x in range(5):
+            Nid = grassfire(TileArray_Kun_Type, (y, x),Nid)
+            
+    for y in range(Crowns.shape[0]):
+            for x in range(Crowns.shape[1]):
+                crownCounter(Crowns,y,x)
+
+    for x in range(len(blobs)):
+        sumP = sumP + len(blobs[x])*sum(blobs[x])
+        
+    print("array med blobs:")
+    print(TileArray_Kun_Type)
+    print("Krone array:")
+    print(Crowns)
+    print("Den samlet værdi af spillepladen er", sumP)
+
+    Viewer(template, template2, template3, library_Of_Images[f'image{i}'], )
+
+
+
+
+
+
+
+
 
 
 
