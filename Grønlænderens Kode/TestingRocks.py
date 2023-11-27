@@ -44,15 +44,16 @@ cv.imshow("Contours2", drawCont2)
 #bounding boxes
 bounding_boxes = [cv.boundingRect(cnt) for cnt in unique_contours]
 
+loc = []
+
 for pt in bounding_boxes:
     x, y, w, h = pt
-    cv.rectangle(image, (x, y), (x+w, y+h), (255, 255, 0), 2)
-    
+    Bounding = cv.rectangle(image, (x, y), (x+w, y+h), (255, 255, 0), 2)
+    circles = cv.circle(image, (x+w//2, y+h//2), 2, (0, 0, 255), 2)
+    loc.append((x+w//2, y+h//2))
+
+print(loc)
 
 cv.imshow("Bounding boxes", image)
-
-print(bounding_boxes)
-
-
 #cv.imshow("HSVImage", HSVImage)
 cv.waitKey(0)
