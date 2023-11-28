@@ -16,7 +16,7 @@ ContrastImg = cv.equalizeHist(GrayImg)
 #cv.imshow("ContrastImg", ContrastImg)
 
 Gaussian = cv.GaussianBlur(ContrastImg, (9, 9), 0)
-cv.imshow("Gaussian", Gaussian)
+#cv.imshow("Gaussian", Gaussian)
 
 Contrast2 = cv.equalizeHist(Gaussian)
 cv.imshow("Contrast2", Contrast2)
@@ -24,14 +24,29 @@ cv.imshow("Contrast2", Contrast2)
 Contrast2Inv = cv.bitwise_not(Contrast2)
 cv.imshow("Contrast2Inv", Contrast2Inv)
 
-#sobelx = cv.Sobel(Contrast2, cv.CV_64F, 1, 0, ksize=3)
+Subtract = cv.subtract(Contrast2Inv, Contrast2)
+cv.imshow("Subtract", Subtract)
+
+SubtractInv = cv.bitwise_not(Subtract)
+cv.imshow("SubtractInv", SubtractInv)
+
+Subtract2 = cv.subtract(Contrast2, Subtract)
+cv.imshow("Subtract2", Subtract2)
+
+ADD = cv.add(Contrast2, SubtractInv)
+cv.imshow("ADD", ADD)
+
+ADDInv = cv.bitwise_not(ADD)
+cv.imshow("ADDInv", ADDInv)
+
+#sobelx = cv.Sobel(Contrast2, cv.CV_64F, 1, 0, ksize=9)
 #cv.imshow("Sobelx", sobelx)
 
-#sobely = cv.Sobel(Contrast2, cv.CV_64F, 0, 1, ksize=3)
+#sobely = cv.Sobel(Contrast2, cv.CV_64F, 0, 1, ksize=9)
 #cv.imshow("Sobely", sobely)
 
-Threshold = cv.threshold(Contrast2Inv, 210, 255, cv.THRESH_BINARY)[1]
-cv.imshow("Threshold", Threshold)
+Threshold = cv.threshold(Contrast2Inv, 230, 255, cv.THRESH_BINARY)[1]
+#cv.imshow("Threshold", Threshold)
 
 #Cannyedge
 Canny = cv.Canny(Contrast2, 210, 220)
