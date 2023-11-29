@@ -1,7 +1,5 @@
 import cv2 as cv
 import numpy as np
-import skimage.exposure as exposure
-
 
 # Load the image
 image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image3.jpg")
