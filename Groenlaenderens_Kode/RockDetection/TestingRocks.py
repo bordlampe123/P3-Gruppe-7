@@ -1,112 +1,88 @@
 import cv2 as cv
 import numpy as np
+import skimage.exposure as exposure
+
 
 # Load the image
-image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Grønlænderens_Kode/RockDetection/Billeder/Image3.jpg")
+image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image3.jpg")
+
+image2 = image.copy()
+
 cv.imshow("Image", image)
 
 # Convert to grayscale
-gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-cv.imshow("Gray", gray)
+gray = cv.cvtColor(image2, cv.COLOR_BGR2GRAY)
 
 sobelx = cv.Sobel(gray, cv.CV_64F, 1, 0, ksize=5)
 sobely = cv.Sobel(gray, cv.CV_64F, 0, 1, ksize=5)
+
+normSobelx = cv.normalize(sobelx, None, 0, 255, cv.NORM_MINMAX, cv.CV_8U)
+normSobely = cv.normalize(sobely, None, 0, 255, cv.NORM_MINMAX, cv.CV_8U)
+
+SquaredSobelx = cv.multiply(sobelx, sobelx)
+SquaredSobely = cv.multiply(sobely, sobely)
+
+SqrtSobel = cv.sqrt(SquaredSobelx + SquaredSobely + SquaredSobelx + SquaredSobely)
+Sobel = cv.add(normSobelx, normSobely)
+NormSqrtSob = cv.normalize(SqrtSobel, None, 0, 170, cv.NORM_MINMAX, cv.CV_8U)
+
+cv.imshow("SqrtSobelx", SqrtSobel)
+cv.imshow("Sobel", Sobel)
+cv.imshow("NormSqrtSob", NormSqrtSob)
+
+cv.imshow("SquaredSobelx", SquaredSobelx)
+cv.imshow("SquaredSobely", SquaredSobely)
+
+cv.imshow("Sobelx2", normSobelx)
+cv.imshow("Sobely2", normSobely)
+
 cv.imshow("Sobelx", sobelx)
 cv.imshow("Sobely", sobely)
+cv.waitKey(0)
 
-HSVImage = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+HSVImage = cv.cvtColor(image2, cv.COLOR_BGR2HSV)
 H, S, V = cv.split(HSVImage)
 
-#cv.imshow("H", H)
-cv.imshow("S", S)
-#cv.imshow("V", V)
-
 thresholded = cv.threshold(S, 2, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
-cv.imshow("Thresholded", thresholded)
 
+dilated = cv.dilate(thresholded, (3, 3), iterations=1)
 
-dialated = cv.dilate(thresholded, (3, 3), iterations=1)
-cv.imshow("Dialated", dialated)
+contours = cv.findContours(dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
 
-contours = cv.findContours(dialated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
-
-#drawCont = cv.drawContours(image, contours, -1, (0, 255, 0), 2)
-
-#cv.imshow("Binary", binary)
-#cv.imshow("Contours", drawCont)
-
-#printing area of contours
-for cnt in contours:
-    area = cv.contourArea(cnt)
-
+# printing area of contours
 small_contours = [cnt for cnt in contours if cv.contourArea(cnt) < 200]
 
 mask = np.zeros_like(thresholded)
 cv.drawContours(mask, small_contours, -1, (255, 255, 255), -1)
-cv.imshow("Mask", mask)
 
 subtractedSmall = cv.subtract(thresholded, mask)
-cv.imshow("Subtracted", subtractedSmall)
 
-dialated2 = cv.dilate(subtractedSmall, (3, 3), iterations=6)
-cv.imshow("Dialated2", dialated2)
+dilated2 = cv.dilate(subtractedSmall, (3, 3), iterations=6)
 
-contours2 = cv.findContours(dialated2, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
-#drawCont2 = cv.drawContours(image, contours2, -1, (0, 255, 0), 2)
+contours2 = cv.findContours(dilated2, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
 
-#cv.imshow("Contours2", drawCont2)
 ellipse_img = np.zeros_like(image)
 roi = []
+ellipsis = []
 
 for cnt in contours2:
     contour_area = cv.contourArea(cnt)
-
     ellipse = cv.fitEllipse(cnt)
-    #for ellipse in [ellipse]:
-        #print(ellipse)
-    #cv.ellipse(image, ellipse, (0, 255, 0), 2)
+    ellipsis.append(ellipse)
+    cv.ellipse(image2, ellipse, (0, 255, 0), 2)
 
     x, y, w, h = cv.boundingRect(cnt)
-    #cv.rectangle(image, (x, y), (x+w, y+h), (255, 255, 0), 2)
-    roi.append(image[y:y+h, x:x+w])
-      
+    Box = cv.boxPoints(ellipse)
+    print(Box)
+    cv.rectangle(image2, (x-10, y-10), (x+w+10, y+h+10), (0, 0, 255), 2)
+    roi.append(image[y-10:y+h+10, x-10:x+w+10])
+
 for img in roi:
-    meanshift = cv.pyrMeanShiftFiltering(img, 2, 40)
-    gauss = cv.GaussianBlur(meanshift, (3, 3), 0)
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    equalis = cv.equalizeHist(gray)
-    cv.imshow("ROI", equalis)
-    cv.imshow("ROI2", meanshift)
-    cv.imshow("ROI3", gauss)
-    cv.waitKey(1)
-
-
+    cv.destroyAllWindows()
+    cv.imshow("ROI", img)
+    cv.waitKey(0)
 
 cv.imshow("Image", image)
-
-
-#min_area = 2100
-#unique_contours = [cnt for cnt in contours if cv.contourArea(cnt) > min_area]
-
-#print(len(unique_contours))
-
-#drawCont2 = cv.drawContours(image, unique_contours, -1, (0, 255, 0), 2)
-
-#cv.imshow("Contours2", drawCont2)
-
-#bounding boxes
-#bounding_boxes = [cv.boundingRect(cnt) for cnt in unique_contours]
-
-loc = []
-
-#for pt in bounding_boxes:
-    #x, y, w, h = pt
-    #Bounding = cv.rectangle(image, (x, y), (x+w, y+h), (255, 255, 0), 2)
-    #circles = cv.circle(image, (x+w//2, y+h//2), 2, (0, 0, 255), 2)
-    #loc.append((x+w//2, y+h//2))
-
-#print(loc)
-
-#cv.imshow("Bounding boxes", image)
-#cv.imshow("HSVImage", HSVImage)
+cv.imshow("Image2", image2)
 cv.waitKey(0)
+cv.destroyAllWindows()
