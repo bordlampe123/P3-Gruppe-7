@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 # Load the image
-image = cv.imread("Billeder/RGB_UP/Image11.jpg")
+image = cv.imread("Grønlænderens_Kode/RockDetection/Billeder/Image3.jpg")
 cv.imshow("Image", image)
 
 # Convert to grayscale
