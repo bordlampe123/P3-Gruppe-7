@@ -2,14 +2,13 @@ import cv2 as cv
 import numpy as np
 import skimage.exposure as exposure
 
-image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image3.jpg")
+image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image60.jpg")
 image2 = image.copy()
 img3 = image.copy()
 
 img_h, img_w = image.shape[:2]
-cv.imshow("Image", image)
 
-# Convert to grayscale
+# Convert to grayscale0
 gray = cv.cvtColor(image2, cv.COLOR_BGR2GRAY)
 HSVImage = cv.cvtColor(image2, cv.COLOR_BGR2HSV)
 H, S, V = cv.split(HSVImage)
