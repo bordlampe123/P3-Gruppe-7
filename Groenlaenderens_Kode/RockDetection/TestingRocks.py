@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 import skimage.exposure as exposure
 
-image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image60.jpg")
+image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image6.jpg")
 image2 = image.copy()
 img3 = image.copy()
 
@@ -60,7 +60,7 @@ cv.imshow("Normalized Distance", normalized_distance)
 #cv.imshow("Distance Transform", distance_transform)
 #cv.waitKey(0)
 
-ret, sure_fg = cv.threshold(normalized_distance, 0.3 * normalized_distance.max(), 255, 0)
+ret, sure_fg = cv.threshold(normalized_distance, 0.45 * normalized_distance.max(), 255, 0)
 sure_fg = np.uint8(sure_fg)
 sure_fg = cv.dilate(sure_fg, kernel, iterations=4)
 sure_bg = cv.cvtColor(sure_bg, cv.COLOR_BGR2GRAY)
