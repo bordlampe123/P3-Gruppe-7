@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 import skimage.exposure as exposure
 
-image = cv.imread("Groenlaenderens_Kode/RockDetection/Billeder/Image3.jpg")
+image = cv.imread("Groenlaenderens_Kode/RockDetection/Billeder/Image4.jpg")
 image2 = image.copy()
 img3 = image.copy()
 
@@ -40,7 +40,8 @@ contour_img = np.zeros_like(image)
 contours2 = cv.findContours(dilated2, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
 drawCont = cv.drawContours(contour_img, contours2, -1, (255, 255, 255), -1)
 cv.imshow("Contours", contour_img)
-#cv.waitKey(0)
+print(contours2[0])
+cv.waitKey(0)
 
 kernel = np.ones((3, 3), np.uint8)
 kernel2 = np.ones((11, 11), np.uint8)
@@ -113,9 +114,9 @@ for cnt in contours2:
 
     inbound_x = max(0, min(x_coord, img_w - text_size[0]))
     inbound_y = max(0, min(y_coord, img_h))
-    #cv.putText(image2, str(i), (inbound_x, inbound_y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv.putText(image2, str(i), (inbound_x, inbound_y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
     ellipsis.append(ellipse)
-    #cv.ellipse(image2, ellipse, (0, 255, 0), 2)
+    cv.ellipse(image2, ellipse, (0, 255, 0), 2)
     i += 1
 
     x, y, w, h = cv.boundingRect(cnt)

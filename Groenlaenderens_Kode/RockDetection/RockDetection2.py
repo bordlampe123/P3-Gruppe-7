@@ -42,6 +42,9 @@ contours2 = cv.findContours(dilated2, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[
 drawCont = cv.drawContours(contour_img, contours2, -1, (255, 255, 255), -1)
 cv.imshow("Contours", contour_img)
 
+InBoundRock = []
+OutBoundRock = []
+
 print(contours2[0])
 for cnt in contours2:
     SortingConvexHull = cv.convexHull(cnt)
@@ -49,6 +52,16 @@ for cnt in contours2:
     cv.ellipse(image2, SortingEllipse, (0, 255, 0), 2)
     cv.imshow("Image2", image2)
     cv.waitKey(0)
+    if 0 < SortingEllipse[0][0] < img_w and 0 < SortingEllipse[0][1] < img_h:
+        InBoundRock.append(SortingEllipse)
+    else:
+        OutBoundRock.append(SortingEllipse)
+
+
+
+print("Inbound Rock Count:", len(InBoundRock))
+print("Outbound Rock Count:", len(OutBoundRock))
+cv.waitKey(0)
 
 cv.imshow("drawCont", drawCont) 
 cv.waitKey(0)
@@ -120,15 +133,6 @@ for cont in AllCont:
     cv.ellipse(img3, ellipsis, (0, 255, 0), 2)
     AllEllips.append(ellipsis)
 
-InBoundRock = []
-OutBoundRock = []
-
-for ellipse in AllEllips:
-    if 0 < ellipse[0][0] < img_w and 0 < ellipse[0][1] < img_h:
-        InBoundRock.append(ellipse)
-    else:
-        OutBoundRock.append(ellipse)
-
 
 print("Rock Count:", len(AllEllips))
 print("Inbound Rock Count:", len(InBoundRock))
@@ -142,6 +146,3 @@ cv.imshow("Image3", img3)
 cv.imshow("Labels", labelVis)
 cv.waitKey(0)
 cv.destroyAllWindows()
-
-
-
