@@ -3,19 +3,18 @@ import numpy as np
 import skimage.exposure as exposure
 
 #Load image and get image dimensions
-image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image27.jpg")
+image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image11.jpg")
 image2 = image.copy()
 img3 = image.copy()
 img_h, img_w = image.shape[:2]
 
-# Convert to grayscale and HSV
-gray = cv.cvtColor(image2, cv.COLOR_BGR2GRAY)
+# Convert to HSV and split into channels
 HSVImage = cv.cvtColor(image2, cv.COLOR_BGR2HSV)
-
-# Split HSV image into channels and thresholding the saturation channel
 H, S, V = cv.split(HSVImage)
 cv.imshow("S", S)   
-thresholded = cv.threshold(S, 33, 255, cv.THRESH_BINARY)[1]
+
+# Thresholding the saturation channel
+thresholded = cv.threshold(S, 31.9, 255, cv.THRESH_BINARY)[1]
 #cv.imshow("Thresholded", thresholded)
 
 # Dilate thresholded image and find contours
@@ -24,7 +23,7 @@ cv.imshow("Dilated", dilated)
 contours = cv.findContours(thresholded, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
 
 #Finding small contours and drawing them on a mask
-small_contours = [cnt for cnt in contours if cv.contourArea(cnt) < 500]
+small_contours = [cnt for cnt in contours if cv.contourArea(cnt) < 1000]
 mask = np.zeros_like(thresholded)
 cv.drawContours(mask, small_contours, -1, (255, 255, 255), -1)
 #cv.imshow("Mask", mask)
@@ -32,35 +31,52 @@ cv.drawContours(mask, small_contours, -1, (255, 255, 255), -1)
 
 #Subtracting the small contours from the thresholded image
 subtractedSmall = cv.subtract(thresholded, mask)
-
-#Dilating the subtracted image and finding contours
-dilated2 = cv.dilate(subtractedSmall, (5, 5), iterations=2)
+dialated2 = cv.dilate(subtractedSmall, (3, 3), iterations=2)
+contours2 = cv.findContours(dialated2, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
 contour_img = np.zeros_like(image)
-contours2 = cv.findContours(dilated2, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
 
 #Drawing filled contours on the contour_img
 drawCont = cv.drawContours(contour_img, contours2, -1, (255, 255, 255), -1)
 cv.imshow("Contours", contour_img)
 
+#Lists for sorting contours and ROI
 InBoundRock = []
+InBoundCont = []
 OutBoundRock = []
+SortHull = []
+SolidityThres = 0.88
+EllipseThres = 0.80
+MultipleRocks = []
 
-print(contours2[0])
+
 for cnt in contours2:
+    Area = cv.contourArea(cnt)
     SortingConvexHull = cv.convexHull(cnt)
     SortingEllipse = cv.fitEllipse(SortingConvexHull)
+    ConvexHullArea = cv.contourArea(SortingConvexHull)
+    SortingEllipseArea = (SortingEllipse[1][0]/2)*(SortingEllipse[1][1]/2)*np.pi
+    Solidity = float(Area)/ConvexHullArea
+    SolidityEllipse = float(Area)/SortingEllipseArea
+    print("Solidity" + " " + str(Solidity))
+    print("Ellipse" + " " + str(SolidityEllipse))
     cv.ellipse(image2, SortingEllipse, (0, 255, 0), 2)
     cv.imshow("Image2", image2)
     cv.waitKey(0)
-    if 0 < SortingEllipse[0][0] < img_w and 0 < SortingEllipse[0][1] < img_h:
+    if 15 < SortingEllipse[0][0] < img_w-15 and 15 < SortingEllipse[0][1] < img_h-15:
         InBoundRock.append(SortingEllipse)
+        InBoundCont.append(cnt)
+        SortHull.append(SortingConvexHull)
+        if Solidity < SolidityThres and SolidityEllipse < EllipseThres:
+            MultipleRocks.append(SortingEllipse)
     else:
         OutBoundRock.append(SortingEllipse)
 
 
 
-print("Inbound Rock Count:", len(InBoundRock))
-print("Outbound Rock Count:", len(OutBoundRock))
+cv.rectangle(image2, (15, 15), (img_w-15, img_h-15), (0, 0, 255), 2)
+
+#print("Inbound Rock Count:", len(InBoundRock))
+#print("Outbound Rock Count:", len(OutBoundRock))
 cv.waitKey(0)
 
 cv.imshow("drawCont", drawCont) 
@@ -135,8 +151,6 @@ for cont in AllCont:
 
 
 print("Rock Count:", len(AllEllips))
-print("Inbound Rock Count:", len(InBoundRock))
-print("Outbound Rock Count:", len(OutBoundRock))
 
 
 cv.imshow("labels2", np.uint8(labels))
