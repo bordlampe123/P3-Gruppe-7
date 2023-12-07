@@ -3,7 +3,7 @@ import numpy as np
 import skimage.exposure as exposure
 
 #Load image and get image dimensions
-image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image5.jpg")
+image = cv.imread("Groenlaenderens_Kode/RockDetection/Billeder/Image5.jpg")
 image2 = image.copy()
 image3 = image.copy()
 img_h, img_w = image.shape[:2]
@@ -119,7 +119,8 @@ def main(image):
         EllipseArea = (SortingEllipse[1][0]/2)*(SortingEllipse[1][1]/2)*np.pi
         Solidity = float(Area)/ConvexHullArea
         SolidityEllipse = float(Area)/EllipseArea
-
+        print(Solidity)
+        print(SolidityEllipse)
         cv.ellipse(image2, SortingEllipse, (0, 255, 0), 2)
         if 15 < SortingEllipse[0][0] < img_w-15 and 15 < SortingEllipse[0][1] < img_h-15:
             InBoundRock.append(SortingEllipse)
