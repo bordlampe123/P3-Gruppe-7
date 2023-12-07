@@ -3,7 +3,7 @@ import numpy as np
 import skimage.exposure as exposure
 
 #Load image and get image dimensions
-image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image4.jpg")
+image = cv.imread("C:/Users/minik/Desktop/VSCode/GIt/P3-Gruppe-7/Groenlaenderens_Kode/RockDetection/Billeder/Image5.jpg")
 image2 = image.copy()
 image3 = image.copy()
 img_h, img_w = image.shape[:2]
