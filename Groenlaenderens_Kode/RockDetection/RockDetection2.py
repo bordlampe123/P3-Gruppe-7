@@ -37,7 +37,7 @@ def Preproccesing(image):
     #Drawing filled contours on the contour_img
     drawCont = cv.drawContours(contour_img, contours2, -1, (255, 255, 255), -1)
     #cv.imshow("Contours", contour_img)
-    return contours2, drawCont, contour_img
+    return contours2, contour_img
 
 
 def watershed(image):
@@ -98,73 +98,82 @@ def watershed(image):
         return LabelContours
         
 
-    
-contours2, drawCont, contour_img = Preproccesing(image)
+def main(image):
+    #Preproccesing
+    contours2, contour_img = Preproccesing(image)
 
-#Creating lists for sorting contours, and establishing thresholds
-InBoundRock = []
-OutBoundRock = []
-SortHull = []
-SingleRock = []
-MultipleRocks = []
-SolidityThres = 0.88
-EllipseThres = 0.80
-LowerSolidityThres = 0.50
-LowerEllipseThres = 0.50
+    #Creating lists for sorting contours, and establishing thresholds
+    InBoundRock = []
+    OutBoundRock = []
+    SortHull = []
+    SingleRock = []
+    MultipleRocks = []
+    SolidityThres = 0.88
+    EllipseThres = 0.80
+    LowerSolidityThres = 0.50
+    LowerEllipseThres = 0.50
 
-#Sorting contours based on convex and ellipse solidity, and based on image boundaries
-for cnt in contours2:
-    SortingConvexHull = cv.convexHull(cnt)
-    SortingEllipse = cv.fitEllipse(SortingConvexHull)
+    #Sorting contours based on convex and ellipse solidity, and based on image boundaries
+    for cnt in contours2:
+        SortingConvexHull = cv.convexHull(cnt)
+        SortingEllipse = cv.fitEllipse(SortingConvexHull)
 
-    Area = cv.contourArea(cnt)
-    ConvexHullArea = cv.contourArea(SortingConvexHull)
-    EllipseArea = (SortingEllipse[1][0]/2)*(SortingEllipse[1][1]/2)*np.pi
-    Solidity = float(Area)/ConvexHullArea
-    SolidityEllipse = float(Area)/EllipseArea
+        Area = cv.contourArea(cnt)
+        ConvexHullArea = cv.contourArea(SortingConvexHull)
+        EllipseArea = (SortingEllipse[1][0]/2)*(SortingEllipse[1][1]/2)*np.pi
+        Solidity = float(Area)/ConvexHullArea
+        SolidityEllipse = float(Area)/EllipseArea
 
-    cv.ellipse(image2, SortingEllipse, (0, 255, 0), 2)
-    if 15 < SortingEllipse[0][0] < img_w-15 and 15 < SortingEllipse[0][1] < img_h-15:
-        InBoundRock.append(SortingEllipse)
-        SortHull.append(SortingConvexHull)
-        if Solidity < SolidityThres and SolidityEllipse < EllipseThres:
-            MultipleRocks.append(cnt)
+        cv.ellipse(image2, SortingEllipse, (0, 255, 0), 2)
+        if 15 < SortingEllipse[0][0] < img_w-15 and 15 < SortingEllipse[0][1] < img_h-15:
+            InBoundRock.append(SortingEllipse)
+            SortHull.append(SortingConvexHull)
+            if Solidity < SolidityThres and SolidityEllipse < EllipseThres:
+                MultipleRocks.append(cnt)
+            else:
+                SingleRock.append(cnt)
         else:
-            SingleRock.append(cnt)
-    else:
-        OutBoundRock.append(SortingEllipse)
+            OutBoundRock.append(SortingEllipse)
 
 
-MultipleRockImg = np.zeros_like(image)
-SingleRockImg = np.zeros_like(image)
+    MultipleRockImg = np.zeros_like(image)
+    SingleRockImg = np.zeros_like(image)
 
-cv.drawContours(MultipleRockImg, MultipleRocks, -1, (255, 255, 255), -1)
-cv.drawContours(SingleRockImg, SingleRock, -1, (255, 255, 255), -1)
+    cv.drawContours(MultipleRockImg, MultipleRocks, -1, (255, 255, 255), -1)
+    cv.drawContours(SingleRockImg, SingleRock, -1, (255, 255, 255), -1)
 
-cv.imshow("MultipleRockImg", MultipleRockImg)
-cv.imshow("SingleRockImg", SingleRockImg)
+    cv.imshow("MultipleRockImg", MultipleRockImg)
+    cv.imshow("SingleRockImg", SingleRockImg)
 
 
-LabelContours = watershed(MultipleRockImg)
-AllEllipse = []
-AllContours = []
-FinalImg = np.zeros_like(image)
-FinalImg[SingleRockImg == 255] = 255
-AllContours.extend(SingleRock)
+    LabelContours = watershed(MultipleRockImg)
+    AllEllipse = []
+    AllContours = []
+    FinalImg = np.zeros_like(image)
+    FinalImg[SingleRockImg == 255] = 255
+    AllContours.extend(SingleRock)
 
-for contours in LabelContours:
-    AllContours.extend(contours)
-    cv.drawContours(FinalImg, contours, -1, (255, 255, 255), -1)
+    for contours in LabelContours:
+        AllContours.extend(contours)
+        cv.drawContours(FinalImg, contours, -1, (255, 255, 255), -1)
+        
+    for cnt in AllContours:
+        ellipse = cv.fitEllipse(cnt)
+        #print(ellipse)
+        AllEllipse.append(ellipse)
+        cv.ellipse(image3, ellipse, (0, 255, 0), 2)
+
+    #Sorting ellipses based on longest axis
+    for ellipse in AllEllipse:
+        SortedEllipse = sorted(AllEllipse, key=lambda x: max(x[1]), reverse=True)
+
     
-for cnt in AllContours:
-    ellipse = cv.fitEllipse(cnt)
-    print(ellipse)
-    AllEllipse.append(ellipse)
-    cv.ellipse(image3, ellipse, (0, 255, 0), 2)
-
-#Sorting ellipses based on longest axis
-for ellipse in AllEllipse:
-    SortedEllipse = sorted(AllEllipse, key=lambda x: max(x[1]), reverse=True)
+    cv.imshow("Image2", image2)
+    cv.imshow("Image3", image3)
+    cv.imshow("FinalImg", FinalImg)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+    return SortedEllipse
 
 def GetList(x,y):
     if x == 0 and y == 0:
@@ -175,9 +184,5 @@ def GetList(x,y):
         return SortedEllipse[x]
 
 
-
-cv.imshow("Image2", image2)
-cv.imshow("Image3", image3)
-cv.imshow("FinalImg", FinalImg)
-cv.waitKey(0)
-cv.destroyAllWindows()
+SortedEllipse = main(image)
+print(GetList(2,1))
