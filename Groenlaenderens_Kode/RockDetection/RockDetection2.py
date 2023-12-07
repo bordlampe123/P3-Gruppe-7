@@ -15,14 +15,10 @@ def Preproccesing(image):
 
     # Thresholding the saturation channel,
     thresholded = cv.threshold(S, 31.9, 255, cv.THRESH_BINARY)[1]
-    #cv.imshow("Thresholded", thresholded)
+    cv.imshow("Thresholded", thresholded)
 
-    # Dilate thresholded image and find contours
-    dilated = cv.dilate(thresholded, (3, 3), iterations=3)
-    #cv.imshow("Dilated", dilated)
+    #Finding contours and drawing the small contours on a mask, based on size
     contours = cv.findContours(thresholded, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
-
-    #Finding small contours and drawing them on a mask
     small_contours = [cnt for cnt in contours if cv.contourArea(cnt) < 1000]
     mask = np.zeros_like(thresholded)
     cv.drawContours(mask, small_contours, -1, (255, 255, 255), -1)
@@ -30,8 +26,8 @@ def Preproccesing(image):
 
     #Subtracting the small contours from the thresholded image
     subtractedSmall = cv.subtract(thresholded, mask)
-    dialated2 = cv.dilate(subtractedSmall, (3, 3), iterations=2)
-    contours2 = cv.findContours(dialated2, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
+    dilated = cv.dilate(subtractedSmall, (3, 3), iterations=2)
+    contours2 = cv.findContours(dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
     contour_img = np.zeros_like(image)
 
     #Drawing filled contours on the contour_img
