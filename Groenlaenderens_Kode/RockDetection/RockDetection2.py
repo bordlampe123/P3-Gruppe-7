@@ -3,43 +3,47 @@ import numpy as np
 import skimage.exposure as exposure
 
 #Load image and get image dimensions
-image = cv.imread("Groenlaenderens_Kode/RockDetection/Billeder/Image_1.jpg")
+image = cv.imread("Groenlaenderens_Kode/RockDetection/Billeder/image_5.jpg")
+image = cv.resize(image, (1280, 720))
 image2 = image.copy()
 image3 = image.copy()
 img_h, img_w = image.shape[:2]
 
 def Preproccesing(image, threshold):
     # Convert to HSV and split into channels
-    HSVImage = cv.cvtColor(contrast, cv.COLOR_BGR2HSV)
+    brightened = cv.add(image, np.array([50.0]))
+    HSVImage = cv.cvtColor(brightened, cv.COLOR_BGR2HSV)
     H, S, V = cv.split(HSVImage) 
-    cv.imshow("contrast", contrast)
     cv.imshow("S", S)
     # Thresholding the saturation channel,
     thresholded = cv.threshold(S, threshold, 255, cv.THRESH_BINARY_INV)[1]
     cv.imshow("Thresholded", thresholded)
     cv.waitKey(0)
+    
+    dilated = cv.dilate(thresholded, (3, 3), iterations=2)
     #Finding contours and drawing the small contours on a mask, based on size
     eroded = cv.erode(thresholded, (3, 3), iterations=2)
     opening = cv.morphologyEx(eroded, cv.MORPH_OPEN, (3, 3), iterations=2)
-    cv.imshow("Opening", opening)    
-    cv.imshow("Eroded", eroded)
-    cv.waitKey(0)
-    contours = cv.findContours(eroded, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
+    #cv.imshow("Opening", opening)    
+    #cv.imshow("Eroded", eroded)
+    #cv.waitKey(0)
+    contours = cv.findContours(dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
     small_contours = [cnt for cnt in contours if cv.contourArea(cnt) < 1000]
     mask = np.zeros_like(thresholded)
     cv.drawContours(mask, small_contours, -1, (255, 255, 255), -1)
-    #cv.imshow("Mask", mask)
+    cv.imshow("Mask", mask)
 
     #Subtracting the small contours from the thresholded image
     subtractedSmall = cv.subtract(thresholded, mask)
     dilated = cv.dilate(subtractedSmall, (3, 3), iterations=2)
     contours2 = cv.findContours(dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
     contour_img = np.zeros_like(image)
-
+    cv.imshow("SubtractedSmall", subtractedSmall)
     #Drawing filled contours on the contour_img
     drawCont = cv.drawContours(contour_img, contours2, -1, (255, 255, 255), -1)
     #cv.imshow("Contours", contour_img)
     cv.imshow("Contour",contour_img)
+    cv.resize(contour_img, (1280, 720))
     cv.waitKey(0)
     return contours2, contour_img
 
@@ -103,9 +107,9 @@ def watershed(image, x):
         return LabelContours
         
 
-def main(image):
+def main(image, threshold):
     #Preproccesing
-    contours2, contour_img = Preproccesing(image, 33)
+    contours2, contour_img = Preproccesing(image, threshold)
 
     #Creating lists for sorting contours, and establishing thresholds
     InBoundRock = []
@@ -176,6 +180,7 @@ def main(image):
     cv.imshow("Image2", image2)
     cv.imshow("Image3", image3)
     cv.imshow("FinalImg", FinalImg)
+    cv.resizeWindow("FinalImg", 600, 600)
     cv.waitKey(0)
     cv.destroyAllWindows()
     return SortedEllipse
@@ -189,6 +194,6 @@ def GetList(x,y):
         return SortedEllipse[x]
 
 
-#SortedEllipse = main(image)
-Preproccesing(image, 80)
+SortedEllipse = main(image, 55)
+
 #print(GetList(2,1))
