@@ -3,7 +3,7 @@ import numpy as np
 import skimage.exposure as exposure
 
 #Load image and get image dimensions
-image = cv.imread("Groenlaenderens_Kode/RockDetection/Billeder/image_5.jpg")
+image = cv.imread("Groenlaenderens_Kode/RockDetection/Billeder/image_6.jpg")
 image = cv.resize(image, (1280, 720))
 image2 = image.copy()
 image3 = image.copy()
@@ -11,12 +11,14 @@ img_h, img_w = image.shape[:2]
 
 def Preproccesing(image, threshold):
     # Convert to HSV and split into channels
-    brightened = cv.add(image, np.array([50.0]))
+    brightened = cv.add(image, np.array([40.0]))
     HSVImage = cv.cvtColor(brightened, cv.COLOR_BGR2HSV)
     H, S, V = cv.split(HSVImage) 
     cv.imshow("S", S)
+    gaussian = cv.GaussianBlur(S, (7, 7), 0)
+    cv.imshow("Gaussian", gaussian)
     # Thresholding the saturation channel,
-    thresholded = cv.threshold(S, threshold, 255, cv.THRESH_BINARY_INV)[1]
+    thresholded = cv.threshold(S, threshold, 255, cv.THRESH_BINARY)[1]
     cv.imshow("Thresholded", thresholded)
     cv.waitKey(0)
     
@@ -43,7 +45,6 @@ def Preproccesing(image, threshold):
     drawCont = cv.drawContours(contour_img, contours2, -1, (255, 255, 255), -1)
     #cv.imshow("Contours", contour_img)
     cv.imshow("Contour",contour_img)
-    cv.resize(contour_img, (1280, 720))
     cv.waitKey(0)
     return contours2, contour_img
 
@@ -65,7 +66,7 @@ def watershed(image, x):
         distance_transform = cv.distanceTransform(opening_gray, cv.DIST_L2, 5)
         normalized_distance = exposure.rescale_intensity(distance_transform, out_range=(0, 255))
         normalized_distance = normalized_distance.astype(np.uint8)
-        _, distThres = cv.threshold(distance_transform, 17, 255, cv.THRESH_BINARY)
+        _, distThres = cv.threshold(distance_transform, 30, 255, cv.THRESH_BINARY)
         sure_bg = cv.cvtColor(sure_bg, cv.COLOR_BGR2GRAY)
         distThres = np.uint8(distThres)
 
@@ -159,6 +160,7 @@ def main(image, threshold):
     AllEllipse = []
     AllContours = []
     FinalImg = np.zeros_like(image)
+    print(FinalImg.shape)
     FinalImg[SingleRockImg == 255] = 255
     AllContours.extend(SingleRock)
 
@@ -176,7 +178,7 @@ def main(image, threshold):
     for ellipse in AllEllipse:
         SortedEllipse = sorted(AllEllipse, key=lambda x: max(x[1]), reverse=True)
 
-    
+    cv.ellipse(image3, SortedEllipse[1], (0, 0, 255), 2)
     cv.imshow("Image2", image2)
     cv.imshow("Image3", image3)
     cv.imshow("FinalImg", FinalImg)
@@ -186,14 +188,12 @@ def main(image, threshold):
     return SortedEllipse
 
 def GetList(x,y):
-    if x == 0 and y == 0:
-        return SortedEllipse
     if x == 1 and y == 0:
         return SortedEllipse[0]
     if y == 1:
         return SortedEllipse[x]
 
 
-SortedEllipse = main(image, 55)
-
+SortedEllipse = main(image, 33)
+print(SortedEllipse)
 #print(GetList(2,1))
