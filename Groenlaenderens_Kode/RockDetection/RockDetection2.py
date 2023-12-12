@@ -31,8 +31,8 @@ def Preproccesing(image, threshold):
     contours = [cnt for cnt in contours if cv.contourArea(cnt) > 1000]
     contour_img = np.zeros_like(image)
     cv.drawContours(contour_img, contours, -1, (255, 255, 255), -1)
-    #cv.imshow("Contour_img", contour_img)
-    #cv.waitKey(0)
+    cv.imshow("Contour_img", contour_img)
+    cv.waitKey(0)
     return contours, contour_img
 
 def watershed(image, x):
@@ -43,9 +43,11 @@ def watershed(image, x):
     else:
         #Morphological opening
         kernel = np.ones((3, 3), np.uint8)
-        opening = cv.morphologyEx(image, cv.MORPH_OPEN, kernel, iterations=10)
+        opening = cv.morphologyEx(image, cv.MORPH_OPEN, kernel, iterations=10) #Morphological opening = erosion followed by dilation
         opening = np.uint8(opening)
         opening_gray = cv.cvtColor(opening, cv.COLOR_BGR2GRAY)
+        cv.imshow("Opening", opening)
+        cv.waitKey(0)
 
         #Finding sure background and foreground through dilation and distance transform thresholding
         sure_bg = cv.dilate(opening, kernel, iterations=2)
@@ -55,30 +57,33 @@ def watershed(image, x):
         _, distThres = cv.threshold(distance_transform, 30, 255, cv.THRESH_BINARY)
         sure_bg = cv.cvtColor(sure_bg, cv.COLOR_BGR2GRAY)
         distThres = np.uint8(distThres)
-
-        #cv.imshow("Normalized Distance", normalized_distance)
-        #print("Sure_bg", sure_bg.shape)
-        #print("distThres", distThres.shape)
-        #cv.waitKey(0)
+        cv.imshow("sure_bg", sure_bg)
+        cv.waitKey(0)
+        cv.imshow("distance_transform", normalized_distance)
+        cv.waitKey(0)
+        cv.imshow("distThres", distThres)
+        cv.waitKey(0)
         #Finding unknown region
         unknown = cv.subtract(sure_bg, distThres)
         #cv.imshow("sure_bg", sure_bg)
         #cv.imshow("distThres", distThres)
-        #cv.imshow("Unknown", unknown)
-        #cv.waitKey(0)
+        cv.imshow("Unknown", unknown)
+        cv.waitKey(0)
 
         #Labeling the markers, 
-        labels = cv.connectedComponents(distThres, connectivity=8, ltype=cv.CV_32S)[1]
+        labels = cv.connectedComponents(distThres, connectivity=8, ltype=cv.CV_32S)[1] #Markerer baggrunden med 0, og markerer de forskellige objekter med 1, 2, 3 osv. Connected components = pixel i omkreds med samme værdi
         labels = labels + 1
 
         #Marking the unknown region with zero
-        labels[unknown == 255] = 0
+        labels[unknown == 255] = -1
 
         mask = np.zeros_like(image)
         mask2 = np.zeros_like(image)
         #Watershed
         labels = cv.watershed(contour_img, labels)
         mask[labels == -1] = [255, 0, 0]
+        cv.imshow("Mask", mask)
+        cv.waitKey(0)
         uniqueLabels = np.unique(labels)
         print(uniqueLabels)
         LabelContours = []
@@ -90,14 +95,13 @@ def watershed(image, x):
             labelMask = cv.cvtColor(labelMask, cv.COLOR_BGR2GRAY)
             contours = cv.findContours(labelMask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
             LabelContours.append(contours)
-    
         return LabelContours
         
 
 def main(image, threshold):
     #Preproccesing
     contours, contour_img = Preproccesing(image, threshold)
-
+    FinalImg = np.zeros_like(image)
     #Creating lists for sorting contours, and establishing thresholds
     InBoundRock = []
     OutBoundRock = []
@@ -145,7 +149,7 @@ def main(image, threshold):
     LabelContours = watershed(MultipleRockImg, contour_img)
     AllEllipse = []
     AllContours = []
-    FinalImg = np.zeros_like(image)
+
     print(FinalImg.shape)
     FinalImg[SingleRockImg == 255] = 255
     AllContours.extend(SingleRock)
@@ -168,7 +172,7 @@ def main(image, threshold):
     cv.imshow("Image2", image2)
     cv.imshow("Image3", image3)
     cv.imshow("FinalImg", FinalImg)
-    cv.resizeWindow("FinalImg", 600, 600)
+    
     cv.waitKey(0)
     cv.destroyAllWindows()
     return SortedEllipse
