@@ -1,42 +1,121 @@
+#!/usr/bin/env python3
+
+import rospy
 import cv2 as cv
 import numpy as np
 import skimage.exposure as exposure
+from realsense_ting_controller.srv import *
 
-#Load image and get image dimensions
-image = cv.imread("Groenlaenderens_Kode/RockDetection/Billeder/image_7.jpg")
-image = cv.resize(image, (1280, 720))
-image2 = image.copy()
-image3 = image.copy()
-img_h, img_w = image.shape[:2]
+from realsense_ting_controller.srv import ImgProc, ImgProcResponse
+
+def process_image(data):
+    print(image_command_client("Capture"))
+
+    rospy.sleep(0.5)
+
+    #Load image and get image dimensions
+    image = cv.imread("/home/pe/ws_rockpicker/src/realsense_ting_controller/scripts/Image.jpg")
+    #image = cv.resize(image, (1280, 720)) #resize if you want to look at the pictures, for actual coordinates, uncomment
+    
+
+    cmd = data.request
+
+    if cmd == "Process":
+        print("Process image")
+
+        main_thresh = 55
+
+        SortedEllipse = process_main(image, main_thresh)
+        print(SortedEllipse)
+        print(GetList(SortedEllipse, 1, 0))
+
+        #print(GetList(2,1))
+
+        list = GetList(SortedEllipse, 1,0)
+        array1 = list[0]
+        array2 = list[1]
+        array3 = list[2]
+        arrayproper = []
+        print(array1)
+        print(array2)
+        print(array3)
+        arrayproper.append(array1[0])
+        arrayproper.append(array1[1])
+        arrayproper.append(array2[0])
+        arrayproper.append(array2[1])
+        arrayproper.append(array3)
+
+        print(arrayproper)
+
+        #cv.destroyAllWindows()#
+
+        return ImgProcResponse(arrayproper)
+
+def main():
+
+    rospy.init_node('image_processor_server', anonymous=True)
+
+    s = rospy.Service('process_image', ImgProc, process_image)
+    print("Ready to recieve command")
+
+
+
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print("Shutting down")
+    cv.destroyAllWindows()
+
 
 def Preproccesing(image, threshold):
     # Convert to HSV and split into channels
     brightened = cv.add(image, np.array([40.0]))
     HSVImage = cv.cvtColor(brightened, cv.COLOR_BGR2HSV)
     H, S, V = cv.split(HSVImage) 
-    cv.imshow("H", H)
-    cv.imshow("S", S)
-    cv.imshow("V", V)
-    cv.waitKey(0)
+    #cv.imshow("S", S) #
+    print("her2")
+    gaussian = cv.GaussianBlur(S, (7, 7), 0)
+    #cv.imshow("Gaussian", gaussian)#
     # Thresholding the saturation channel,
-    thresholded = cv.threshold(S, threshold, 255, cv.THRESH_BINARY_INV)[1]
-    cv.imshow("Thresholded", thresholded)
-    cv.imwrite("Thresholded.jpg", thresholded)
-    cv.waitKey(0)
+    thresholded = cv.threshold(S, threshold, 255, cv.THRESH_BINARY)[1]
+    thresholded = cv.bitwise_not(thresholded)
+    #cv.imshow("Thresholded", thresholded)#
+    #cv.waitKey(0)#
     
     dilated = cv.dilate(thresholded, (3, 3), iterations=2)
-    cv.imshow("Dilated", dilated)
-    cv.waitKey(0)
-    contours = cv.findContours(dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
-    contours = [cnt for cnt in contours if cv.contourArea(cnt) > 1000]
-    contour_img = np.zeros_like(image)
-    cv.drawContours(contour_img, contours, -1, (255, 255, 255), -1)
-    #cv.imshow("Contour_img", contour_img)
+    #Finding contours and drawing the small contours on a mask, based on size
+    eroded = cv.erode(thresholded, (3, 3), iterations=2)
+    opening = cv.morphologyEx(eroded, cv.MORPH_OPEN, (3, 3), iterations=2)
+    #cv.imshow("Opening", opening)    
+    #cv.imshow("Eroded", eroded)
     #cv.waitKey(0)
-    return contours, contour_img
+    contours = cv.findContours(dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
+    small_contours = [cnt for cnt in contours if cv.contourArea(cnt) < 1000]
+    mask = np.zeros_like(thresholded)
+    cv.drawContours(mask, small_contours, -1, (255, 255, 255), -1)
+    #cv.imshow("Mask", mask)#
+
+    #Subtracting the small contours from the thresholded image
+    subtractedSmall = cv.subtract(thresholded, mask)
+    dilated = cv.dilate(subtractedSmall, (3, 3), iterations=2)
+    contours2 = cv.findContours(dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
+    contour_img = np.zeros_like(image)
+    #cv.imshow("SubtractedSmall", subtractedSmall)#
+    #Drawing filled contours on the contour_img
+    drawCont = cv.drawContours(contour_img, contours2, -1, (255, 255, 255), -1)
+    #cv.imshow("Contours", contour_img)
+    #cv.imshow("Contour",contour_img)#
+    #cv.waitKey(0)#
+
+    filename = '/home/pe/ws_rockpicker/src/realsense_ting_controller/scripts/Image_thresh.jpg'
+    cv.imwrite(filename, thresholded)
+
+    return contours2, contour_img
+
 
 def watershed(image, x):
     contour_img = x
+    water_thresh = 30
     #checking if image contains anything
     if np.sum(image) == 0:
         return []
@@ -52,7 +131,7 @@ def watershed(image, x):
         distance_transform = cv.distanceTransform(opening_gray, cv.DIST_L2, 5)
         normalized_distance = exposure.rescale_intensity(distance_transform, out_range=(0, 255))
         normalized_distance = normalized_distance.astype(np.uint8)
-        _, distThres = cv.threshold(distance_transform, 30, 255, cv.THRESH_BINARY)
+        _, distThres = cv.threshold(distance_transform, water_thresh, 255, cv.THRESH_BINARY)
         sure_bg = cv.cvtColor(sure_bg, cv.COLOR_BGR2GRAY)
         distThres = np.uint8(distThres)
 
@@ -94,9 +173,20 @@ def watershed(image, x):
         return LabelContours
         
 
-def main(image, threshold):
+def process_main(image, threshold):
+
+    image = image
+
+    image2 = image.copy()
+    image3 = image.copy()
+    img_h, img_w = image.shape[:2]
+
+    #cv.imshow("test", image)#
+
     #Preproccesing
-    contours, contour_img = Preproccesing(image, threshold)
+    contours2, contour_img = Preproccesing(image, threshold)
+
+   
 
     #Creating lists for sorting contours, and establishing thresholds
     InBoundRock = []
@@ -104,11 +194,13 @@ def main(image, threshold):
     SortHull = []
     SingleRock = []
     MultipleRocks = []
-    SolidityThres = 0.88
+    SolidityThres = 0.60
     EllipseThres = 0.80
+    LowerSolidityThres = 0.50
+    LowerEllipseThres = 0.50
 
     #Sorting contours based on convex and ellipse solidity, and based on image boundaries
-    for cnt in contours:
+    for cnt in contours2:
         SortingConvexHull = cv.convexHull(cnt)
         SortingEllipse = cv.fitEllipse(SortingConvexHull)
         Area = cv.contourArea(cnt)
@@ -116,11 +208,9 @@ def main(image, threshold):
         EllipseArea = (SortingEllipse[1][0]/2)*(SortingEllipse[1][1]/2)*np.pi
         Solidity = float(Area)/ConvexHullArea
         SolidityEllipse = float(Area)/EllipseArea
-        print(Solidity)
-        print(SolidityEllipse)
+        #print(Solidity)
+        #print(SolidityEllipse)
         cv.ellipse(image2, SortingEllipse, (0, 255, 0), 2)
-        cv.imshow("Image2", image2)
-        cv.waitKey(0)
         if 15 < SortingEllipse[0][0] < img_w-15 and 15 < SortingEllipse[0][1] < img_h-15:
             InBoundRock.append(SortingEllipse)
             SortHull.append(SortingConvexHull)
@@ -138,8 +228,10 @@ def main(image, threshold):
     cv.drawContours(MultipleRockImg, MultipleRocks, -1, (255, 255, 255), -1)
     cv.drawContours(SingleRockImg, SingleRock, -1, (255, 255, 255), -1)
 
-    cv.imshow("MultipleRockImg", MultipleRockImg)
-    cv.imshow("SingleRockImg", SingleRockImg)
+    filename = '/home/pe/ws_rockpicker/src/realsense_ting_controller/scripts/Image_Rocks.jpg' 
+    cv.imwrite(filename, MultipleRockImg)
+    #cv.imshow("MultipleRockImg", MultipleRockImg)#
+    #cv.imshow("SingleRockImg", SingleRockImg)#
 
 
     LabelContours = watershed(MultipleRockImg, contour_img)
@@ -163,35 +255,41 @@ def main(image, threshold):
     #Sorting ellipses based on longest axis
     for ellipse in AllEllipse:
         SortedEllipse = sorted(AllEllipse, key=lambda x: max(x[1]), reverse=True)
-        cv.circle(image3, (int(ellipse[0][0]), int(ellipse[0][1])), 2, (0, 0, 255), -1)
-    cv.ellipse(image3, SortedEllipse[1], (0, 0, 255), 2)
-    cv.imshow("Image2", image2)
-    cv.imshow("Image3", image3)
-    cv.imshow("FinalImg", FinalImg)
-    cv.resizeWindow("FinalImg", 600, 600)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+
+    cv.ellipse(image3, SortedEllipse[0], (0, 0, 255), 2)
+    
+    #cv.imshow("Image2", image2)#
+    #cv.imshow("Image3", image3)#
+    #cv.imshow("FinalImg", FinalImg)#
+    image_small = cv.resize(image3, (1280, 720))#
+    #cv.imshow("Small", image_small)#
+    #cv.resizeWindow("FinalImg", 600, 600)#
+    #cv.waitKey(0)#
+    #cv.destroyAllWindows()#
+    filename = '/home/pe/ws_rockpicker/src/realsense_ting_controller/scripts/Image_ellipse.jpg'
+    cv.imwrite(filename, image_small)
+    
     return SortedEllipse
 
-def GetList(x,y):
+def GetList(a, x, y):
+    SortedEllipse = a
+
     if x == 1 and y == 0:
         return SortedEllipse[0]
     if y == 1:
         return SortedEllipse[x]
+    
+def image_command_client(c):
 
+    rospy.wait_for_service('capture_command')
 
-SortedEllipse = main(image, 45)
-print(SortedEllipse)
-#print(GetList(2,1))
+    try:
+        gripper_commands = rospy.ServiceProxy('capture_command', ImageCapture)
+        resp = gripper_commands(c)
+        return resp.response
 
-
-
-
-#preprocessing(Input Image, threshold value)
-    #Convert to HSV and split into channels
-    #Thresholding the saturation channel
-    #Dilating the thresholded image to ensure that the rock is mostly complete and not broken up
-    #Finding contours in the dilated image
-    #Sorting contours based on size and drawing the small contours on a mask
-    #Subtracting the small contours from the thresholded image
-
+    except rospy.ServiceException:
+        print("Service call failed :(")
+ 
+if __name__ == '__main__':
+    main()
