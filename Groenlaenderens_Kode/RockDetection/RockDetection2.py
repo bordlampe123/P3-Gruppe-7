@@ -21,7 +21,6 @@ def Preproccesing(image, threshold):
     # Thresholding the saturation channel,
     thresholded = cv.threshold(S, threshold, 255, cv.THRESH_BINARY_INV)[1]
     cv.imshow("Thresholded", thresholded)
-    cv.imwrite("Thresholded.jpg", thresholded)
     cv.waitKey(0)
     
     dilated = cv.dilate(thresholded, (3, 3), iterations=2)
@@ -31,8 +30,8 @@ def Preproccesing(image, threshold):
     contours = [cnt for cnt in contours if cv.contourArea(cnt) > 1000]
     contour_img = np.zeros_like(image)
     cv.drawContours(contour_img, contours, -1, (255, 255, 255), -1)
-    #cv.imshow("Contour_img", contour_img)
-    #cv.waitKey(0)
+    cv.imshow("Contour_img", contour_img)
+    cv.waitKey(0)
     return contours, contour_img
 
 def watershed(image, x):
@@ -43,12 +42,14 @@ def watershed(image, x):
     else:
         #Morphological opening
         kernel = np.ones((3, 3), np.uint8)
-        opening = cv.morphologyEx(image, cv.MORPH_OPEN, kernel, iterations=10)
+        opening = cv.morphologyEx(image, cv.MORPH_OPEN, kernel, iterations=10) #opening the image = erosion followed by dilation
         opening = np.uint8(opening)
         opening_gray = cv.cvtColor(opening, cv.COLOR_BGR2GRAY)
 
         #Finding sure background and foreground through dilation and distance transform thresholding
         sure_bg = cv.dilate(opening, kernel, iterations=2)
+        cv.imshow("Sure_bg", sure_bg)
+        cv.waitKey(0)
         distance_transform = cv.distanceTransform(opening_gray, cv.DIST_L2, 5)
         normalized_distance = exposure.rescale_intensity(distance_transform, out_range=(0, 255))
         normalized_distance = normalized_distance.astype(np.uint8)
@@ -56,15 +57,15 @@ def watershed(image, x):
         sure_bg = cv.cvtColor(sure_bg, cv.COLOR_BGR2GRAY)
         distThres = np.uint8(distThres)
 
-        #cv.imshow("Normalized Distance", normalized_distance)
+        cv.imshow("Normalized Distance", normalized_distance)
         #print("Sure_bg", sure_bg.shape)
         #print("distThres", distThres.shape)
-        #cv.waitKey(0)
+        cv.waitKey(0)
         #Finding unknown region
         unknown = cv.subtract(sure_bg, distThres)
         #cv.imshow("sure_bg", sure_bg)
-        #cv.imshow("distThres", distThres)
-        #cv.imshow("Unknown", unknown)
+        cv.imshow("distThres", distThres)
+        cv.imshow("Unknown", unknown)
         #cv.waitKey(0)
 
         #Labeling the markers, 
@@ -79,6 +80,7 @@ def watershed(image, x):
         #Watershed
         labels = cv.watershed(contour_img, labels)
         mask[labels == -1] = [255, 0, 0]
+        cv.imshow("Mask", mask)
         uniqueLabels = np.unique(labels)
         print(uniqueLabels)
         LabelContours = []
@@ -140,7 +142,7 @@ def main(image, threshold):
 
     cv.imshow("MultipleRockImg", MultipleRockImg)
     cv.imshow("SingleRockImg", SingleRockImg)
-
+    cv.waitKey(0)
 
     LabelContours = watershed(MultipleRockImg, contour_img)
     AllEllipse = []
@@ -168,7 +170,6 @@ def main(image, threshold):
     cv.imshow("Image2", image2)
     cv.imshow("Image3", image3)
     cv.imshow("FinalImg", FinalImg)
-    cv.resizeWindow("FinalImg", 600, 600)
     cv.waitKey(0)
     cv.destroyAllWindows()
     return SortedEllipse
